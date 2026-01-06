@@ -219,7 +219,7 @@ export default function Profile() {
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               {/* Profile Image */}
               <div className="relative -mt-20 md:-mt-24">
-                <div className="relative group">
+                <div className="relative">
                   {loading ? (
                     <Skeleton circle width={160} height={160} className="md:w-40 md:h-40" />
                   ) : (
@@ -235,17 +235,7 @@ export default function Profile() {
                       </div>
                     )
                   )}
-                  {!loading && (
-                    <button className="absolute bottom-2 right-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors opacity-0 group-hover:opacity-100">
-                      <FaCamera className="text-sm" />
-                    </button>
-                  )}
                 </div>
-
-                {/* Online Status */}
-                {!loading && (
-                  <div className="absolute bottom-4 right-4 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                )}
 
                 {/* UID Display */}
                 {user?.user_uid && !loading && (

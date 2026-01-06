@@ -1,11 +1,11 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { 
-  FaMapMarkerAlt, 
-  FaUser, 
-  FaTasks, 
-  FaWallet, 
-  FaSignOutAlt, 
+import {
+  FaMapMarkerAlt,
+  FaUser,
+  FaTasks,
+  FaWallet,
+  FaSignOutAlt,
   FaHome,
   FaBell,
   FaSearch,
@@ -41,6 +41,55 @@ export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(3); // Mock notification count
+  const [currentLocation, setCurrentLocation] = useState(null);
+
+  // Fetch current location after login
+  useEffect(() => {
+    if (user && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          try {
+            // Use reverse geocoding to get precise location name
+            const response = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const data = await response.json();
+
+            // Build more precise location string
+            let locationParts = [];
+            if (data.localityInfo && data.localityInfo.administrative) {
+              const admin = data.localityInfo.administrative;
+              if (admin[2] && admin[2].name) locationParts.push(admin[2].name); // Neighborhood/Area
+              if (admin[1] && admin[1].name) locationParts.push(admin[1].name); // City
+            }
+            if (data.city) locationParts.push(data.city);
+            if (data.locality) locationParts.push(data.locality);
+
+            // Remove duplicates and join
+            const uniqueParts = [...new Set(locationParts)];
+            const locationName = uniqueParts.length > 0
+              ? uniqueParts.join(', ')
+              : `${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`;
+
+            setCurrentLocation(locationName);
+          } catch (error) {
+            console.error('Error fetching location name:', error);
+            setCurrentLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`);
+          }
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setCurrentLocation('Location unavailable');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes
+        }
+      );
+    }
+  }, [user]);
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -122,11 +171,11 @@ export default function Layout() {
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaSearch className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search tasks..."
-                    className="pl-10 pr-4 py-2 w-64 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search tasks..."
+                      className="pl-10 pr-4 py-2 w-64 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               )}
@@ -181,6 +230,12 @@ export default function Layout() {
                         <div className="px-4 py-3 border-b border-gray-100">
                           <div className="font-semibold text-gray-900">{user.name || "User"}</div>
                           <div className="text-sm text-gray-500">{user.email || ""}</div>
+                          {currentLocation && (
+                            <div className="flex items-center gap-1 mt-1 text-xs text-blue-600">
+                              <FaMapMarkerAlt className="text-xs" />
+                              <span>{currentLocation}</span>
+                            </div>
+                          )}
                         </div>
                         
                         {profileMenuItems.map((item) => (
