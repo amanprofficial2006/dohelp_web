@@ -1,5 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   FaMapMarkerAlt,
   FaUser,
@@ -42,53 +44,72 @@ export default function Layout() {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState(3); // Mock notification count
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [isOnline, setIsOnline] = useState(() => {
+    // Get initial online status from localStorage on component mount
+    const savedOnlineStatus = localStorage.getItem('userOnlineStatus');
+    console.log('Layout component initialized, saved online status from localStorage:', savedOnlineStatus);
+    return savedOnlineStatus === 'true';
+  });
 
-  // Fetch current location after login
+  // Fetch initial online status and location from database after login
   useEffect(() => {
-    if (user && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude, accuracy } = position.coords;
-          try {
-            // Use reverse geocoding to get precise location name
-            const response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-            );
-            const data = await response.json();
+    const fetchUserData = async () => {
+      if (user) {
+        console.log('Fetching initial user data for user:', user);
+        try {
+          const token = sessionStorage.getItem('token');
+          console.log('Token for profile fetch:', token ? 'Present' : 'Missing');
 
-            // Build more precise location string
-            let locationParts = [];
-            if (data.localityInfo && data.localityInfo.administrative) {
-              const admin = data.localityInfo.administrative;
-              if (admin[2] && admin[2].name) locationParts.push(admin[2].name); // Neighborhood/Area
-              if (admin[1] && admin[1].name) locationParts.push(admin[1].name); // City
+          const response = await fetch('https://dohelp.newhopeindia17.com/api/profile', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          });
+
+          console.log('Profile API response status:', response.status);
+
+          if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            console.log('Profile API content-type:', contentType);
+
+            if (contentType && contentType.includes('application/json')) {
+              const responseData = await response.json();
+              console.log('Profile API response data:', responseData);
+
+              if (responseData.status && responseData.data) {
+                console.log('Profile data object:', responseData.data);
+
+                // Note: Online status is now managed locally via localStorage and toggle API
+                // We don't override it from profile API to prevent unwanted changes on refresh
+                console.log('Profile data online status (not used):', responseData.data.online);
+
+                // Parse location string and build display string
+                if (responseData.data.location) {
+                  const locationParts = responseData.data.location.split(',').map(part => part.trim());
+                  const displayLocation = locationParts.filter(part => part).join(', ');
+                  setCurrentLocation(displayLocation);
+                }
+              } else {
+                console.log('Profile response missing status or data:', { status: responseData.status, hasData: !!responseData.data });
+              }
+            } else {
+              console.log('Profile response not JSON');
             }
-            if (data.city) locationParts.push(data.city);
-            if (data.locality) locationParts.push(data.locality);
-
-            // Remove duplicates and join
-            const uniqueParts = [...new Set(locationParts)];
-            const locationName = uniqueParts.length > 0
-              ? uniqueParts.join(', ')
-              : `${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`;
-
-            setCurrentLocation(locationName);
-          } catch (error) {
-            console.error('Error fetching location name:', error);
-            setCurrentLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`);
+          } else {
+            console.log('Profile API request failed:', response.status, response.statusText);
           }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
+        } catch (error) {
+          console.error('Error fetching user data from DB:', error);
           setCurrentLocation('Location unavailable');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000 // 5 minutes
         }
-      );
-    }
+      } else {
+        console.log('No user found, skipping profile fetch');
+      }
+    };
+
+    fetchUserData();
   }, [user]);
 
   // Close mobile menu when route changes
@@ -101,6 +122,85 @@ export default function Layout() {
     logout();
     navigate("/");
     setIsProfileMenuOpen(false);
+  };
+
+  const handleToggleOnline = async () => {
+    try {
+      const token = sessionStorage.getItem('token');
+      console.log('Token:', token ? 'Present' : 'Missing');
+
+      const response = await fetch('https://dohelp.newhopeindia17.com/api/toggle-online', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+
+        if (contentType && contentType.includes('application/json')) {
+          const responseData = await response.json();
+          console.log('Response data:', responseData);
+
+          // Try different possible response structures
+          let newOnlineStatus = null;
+
+          if (responseData.status && responseData.data && responseData.data.online !== undefined) {
+            newOnlineStatus = responseData.data.online;
+            console.log('Found online status in responseData.data.online:', newOnlineStatus);
+          } else if (responseData.online !== undefined) {
+            newOnlineStatus = responseData.online;
+            console.log('Found online status in responseData.online:', newOnlineStatus);
+          } else if (responseData.data !== undefined && typeof responseData.data === 'boolean') {
+            newOnlineStatus = responseData.data;
+            console.log('Found online status as boolean in responseData.data:', newOnlineStatus);
+          }
+
+          if (newOnlineStatus !== null) {
+            console.log('Setting online status to:', newOnlineStatus);
+            setIsOnline(prevState => {
+              console.log('Previous state:', prevState, 'New state:', newOnlineStatus);
+              // Save to localStorage
+              localStorage.setItem('userOnlineStatus', newOnlineStatus.toString());
+              return newOnlineStatus;
+            });
+          } else {
+            console.error('Could not find online status in response:', responseData);
+            console.log('Response structure:', JSON.stringify(responseData, null, 2));
+            // Fallback to local toggle if API doesn't return proper data
+            setIsOnline(prevState => {
+              const fallbackStatus = !prevState;
+              console.log('Fallback: Setting online status to:', fallbackStatus);
+              localStorage.setItem('userOnlineStatus', fallbackStatus.toString());
+              return fallbackStatus;
+            });
+          }
+        } else {
+          console.error('Unexpected response format');
+          // Fallback to local toggle
+          setIsOnline(!isOnline);
+        }
+      } else {
+        console.error('Failed to toggle online status:', response.status, response.statusText);
+        // Try to parse error response
+        try {
+          const errorData = await response.json();
+          console.error('Error details:', errorData);
+        } catch (parseError) {
+          console.error('Could not parse error response');
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling online status:', error);
+      // Fallback to local toggle on network errors
+      setIsOnline(!isOnline);
+    }
   };
 
   const navLinks = [
@@ -182,13 +282,27 @@ export default function Layout() {
 
               {/* Notifications - Only show when logged in */}
               {user && (
-                <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
                   <FaBell className="text-gray-600 text-xl" />
                   {notifications > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                       {notifications}
                     </span>
                   )}
+                </button>
+              )}
+
+              {/* Online/Offline Toggle - Only show when logged in */}
+              {user && (
+                <button
+                  onClick={handleToggleOnline}
+                  className={`relative p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 ${
+                    isOnline ? 'text-green-600' : 'text-gray-400'
+                  }`}
+                  title={isOnline ? 'Go Offline' : 'Go Online'}
+                >
+                  <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                  <span className="text-sm font-medium">{isOnline ? 'Online' : 'Offline'}</span>
                 </button>
               )}
 
@@ -205,14 +319,21 @@ export default function Layout() {
                         alt="Profile"
                         className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
                       />
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                      {isOnline && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>}
                     </div>
                     <div className="text-left hidden lg:block">
                       <div className="font-semibold text-gray-900">
                         {user.name || "Welcome"}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {user.rating ? `${user.rating} ⭐` : "New Member"}
+                        {currentLocation ? (
+                          <div className="flex items-center gap-1">
+                            <FaMapMarkerAlt className="text-xs" />
+                            <span className="truncate max-w-32">{currentLocation}</span>
+                          </div>
+                        ) : (
+                          user.rating ? `${user.rating} ⭐` : "New Member"
+                        )}
                       </div>
                     </div>
                     <FaChevronDown className={`text-gray-500 transition-transform ${isProfileMenuOpen ? "rotate-180" : ""}`} />
@@ -547,6 +668,8 @@ export default function Layout() {
           }
         }
       `}</style>
+
+      <ToastContainer />
     </div>
   );
 }

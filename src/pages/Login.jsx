@@ -54,6 +54,9 @@ export default function Login() {
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Login successful, full response:", data);
+        console.log("Token from response:", data.data.token);
+
         // Map the API response data to userData
         const userData = {
           id: data.data.user_uid || 1,
@@ -63,7 +66,21 @@ export default function Login() {
           profileImage: data.data.profile_image_url || "https://via.placeholder.com/40x40?text=U",
           isVerified: data.data.is_verified || false
         };
-        login(userData, data.data.token);
+
+        const token = data.data.token;
+        if (!token) {
+          console.error("No token found in response data:", data.data);
+          toast.error("Login failed - no authentication token received.");
+          return;
+        }
+
+        console.log("Storing token:", token);
+        login(userData, token);
+
+        // Verify token was stored
+        const storedToken = sessionStorage.getItem('token');
+        console.log("Token stored in sessionStorage:", storedToken);
+
         navigate("/tasks");
       } else {
         toast.error(data.message || "Login failed. Please check your credentials.");

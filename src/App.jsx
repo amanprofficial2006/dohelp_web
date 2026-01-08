@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CategoriesProvider } from "./contexts/CategoriesContext";
 import Layout from "./components/Layout";
 
 import Landing from "./pages/Landing";
@@ -9,6 +10,7 @@ import PostTask from "./pages/PostTask";
 import NearbyTasks from "./pages/NearbyTasks";
 import TaskDetail from "./pages/TaskDetail";
 import MyTasks from "./pages/MyTasks";
+import PostedTasks from "./pages/PostedTasks";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import TaskStatus from "./pages/TaskStatus";
@@ -42,8 +44,9 @@ const RootRedirect = () => {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <CategoriesProvider>
+        <BrowserRouter>
+          <Routes>
           {/* Login and Register pages without layout */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -55,6 +58,7 @@ function App() {
             <Route path="/tasks" element={<NearbyTasks />} />
             <Route path="/task/:id" element={<TaskDetail />} />
             <Route path="/my-tasks" element={<MyTasks />} />
+            <Route path="/posted-tasks" element={<PostedTasks />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/task-status" element={<TaskStatus />} />
@@ -76,6 +80,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
+    </CategoriesProvider>
     </AuthProvider>
   );
 }

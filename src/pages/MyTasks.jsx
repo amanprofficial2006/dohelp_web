@@ -47,7 +47,7 @@ export default function MyTasks() {
     { id: "pending", label: "Pending", count: taskStats.pending, color: "text-yellow-600 bg-yellow-100" },
     { id: "completed", label: "Completed", count: taskStats.completed, color: "text-green-600 bg-green-100" },
     { id: "cancelled", label: "Cancelled", count: taskStats.cancelled, color: "text-red-600 bg-red-100" },
-    { id: "all", label: "All Tasks", count: 18, color: "text-purple-600 bg-purple-100" },
+    { id: "all", label: "All Tasks", count: 16, color: "text-purple-600 bg-purple-100" },
   ];
 
   const tasks = {
@@ -193,6 +193,37 @@ export default function MyTasks() {
         reason: "Task poster changed requirements",
         urgent: false
       },
+    ],
+    posted: [
+      {
+        id: 9,
+        title: "Home Cleaning Service Needed",
+        description: "Need someone to clean my 2BHK apartment thoroughly",
+        category: "Cleaning",
+        amount: "₹1,200",
+        location: "Andheri West",
+        postedTime: "2 days ago",
+        deadline: "This Weekend",
+        status: "open",
+        offers: 4,
+        acceptedBy: null,
+        urgent: false
+      },
+      {
+        id: 10,
+        title: "Grocery Shopping & Delivery",
+        description: "Need groceries picked up from supermarket and delivered",
+        category: "Delivery",
+        amount: "₹500",
+        location: "Powai to Andheri",
+        postedTime: "1 day ago",
+        deadline: "Tomorrow",
+        status: "assigned",
+        offers: 6,
+        acceptedBy: "Rajesh Kumar",
+        acceptedByRating: 4.8,
+        urgent: true
+      },
     ]
   };
 
@@ -230,8 +261,8 @@ export default function MyTasks() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-blue-50 md:p-6">
+      <div className="mx-auto max-w-7xl">
         
         {/* Header */}
         <motion.div
@@ -239,9 +270,9 @@ export default function MyTasks() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="flex flex-col items-start justify-between gap-4 mb-6 md:flex-row md:items-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Tasks Summary</h1>
+              <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">Tasks Summary</h1>
               <p className="text-gray-600">
                 Manage all your posted and accepted tasks in one place
               </p>
@@ -250,16 +281,23 @@ export default function MyTasks() {
             <div className="flex items-center gap-4">
               <Link
                 to="/post-task"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
               >
                 <FaPlusCircle className="text-white" />
-                <span>Post New Task</span>
+                <span className="text-white">Post New Task</span>
+              </Link>
+              <Link
+                to="/posted-tasks"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 hover:shadow-xl"
+              >
+                <FaEye className="text-white" />
+                <span className="text-white">View Posted Tasks</span>
               </Link>
             </div>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-5">
             {tabs.map((tab) => (
               <div
                 key={tab.id}
@@ -284,10 +322,10 @@ export default function MyTasks() {
           </div>
 
           {/* Total Earnings Card */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 mb-6">
+          <div className="p-6 mb-6 border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-600 mb-1">Total Earnings from Completed Tasks</div>
+                <div className="mb-1 text-sm text-gray-600">Total Earnings from Completed Tasks</div>
                 <div className="text-3xl font-bold text-gray-900">₹{taskStats.totalEarnings.toLocaleString()}</div>
               </div>
               <div className="flex items-center gap-4">
@@ -302,7 +340,7 @@ export default function MyTasks() {
         </motion.div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           {/* Left Column - Filters & Actions */}
           <div className="lg:col-span-1">
             <motion.div
@@ -311,26 +349,26 @@ export default function MyTasks() {
               className="space-y-6"
             >
               {/* Search & Filter */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Filter Tasks</h2>
+              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                <h2 className="mb-4 text-lg font-bold text-gray-900">Filter Tasks</h2>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Search</label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <FaSearch className="text-gray-400" />
                       </div>
                       <input
                         type="text"
                         placeholder="Search tasks..."
-                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Sort By</label>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setSortBy("recent")}
@@ -358,11 +396,11 @@ export default function MyTasks() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Category</label>
                     <div className="space-y-2">
                       {["Delivery", "Cleaning", "Online Help", "Handyman", "Tutoring", "Pet Care"].map((category) => (
                         <label key={category} className="flex items-center">
-                          <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                          <input type="checkbox" className="text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                           <span className="ml-2 text-sm text-gray-700">{category}</span>
                         </label>
                       ))}
@@ -371,7 +409,7 @@ export default function MyTasks() {
 
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className="w-full py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                    className="flex items-center justify-center w-full gap-2 py-2 text-blue-600 transition-colors border border-blue-500 rounded-lg hover:bg-blue-50"
                   >
                     <FaFilter />
                     {showFilters ? "Hide Advanced Filters" : "Show Advanced Filters"}
@@ -380,30 +418,30 @@ export default function MyTasks() {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                <h2 className="mb-4 text-lg font-bold text-gray-900">Quick Actions</h2>
                 <div className="space-y-3">
-                  <button className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50">
                     <span className="font-medium text-gray-900">View All Offers</span>
-                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">5 new</span>
+                    <span className="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full">5 new</span>
                   </button>
-                  <button className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors">
+                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50">
                     <span className="font-medium text-gray-900">Pending Payments</span>
-                    <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">₹2,500</span>
+                    <span className="px-2 py-1 text-xs text-green-700 bg-green-100 rounded-full">₹2,500</span>
                   </button>
-                  <button className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors">
+                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50">
                     <span className="font-medium text-gray-900">Awaiting Reviews</span>
-                    <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full">3 tasks</span>
+                    <span className="px-2 py-1 text-xs text-purple-700 bg-purple-100 rounded-full">3 tasks</span>
                   </button>
-                  <button className="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-yellow-300 hover:bg-yellow-50 transition-colors">
+                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50">
                     <span className="font-medium text-gray-900">Disputes</span>
-                    <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">1 open</span>
+                    <span className="px-2 py-1 text-xs text-yellow-700 bg-yellow-100 rounded-full">1 open</span>
                   </button>
                 </div>
               </div>
 
               {/* Achievement */}
-              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl p-6 border border-yellow-200">
+              <div className="p-6 border border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <FaTrophy className="text-2xl text-yellow-500" />
                   <div>
@@ -412,7 +450,7 @@ export default function MyTasks() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">#3</div>
+                  <div className="mb-2 text-3xl font-bold text-gray-900">#3</div>
                   <div className="text-sm text-gray-600">Rank in Mumbai</div>
                 </div>
               </div>
@@ -424,7 +462,7 @@ export default function MyTasks() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+              className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
               {/* Tabs */}
               <div className="border-b border-gray-200">
@@ -457,9 +495,9 @@ export default function MyTasks() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="p-6 hover:bg-gray-50 transition-colors"
+                      className="p-6 transition-colors hover:bg-gray-50"
                     >
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                         {/* Left Content */}
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-3">
@@ -467,7 +505,7 @@ export default function MyTasks() {
                               <div className="flex items-center gap-3 mb-2">
                                 <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
                                 {task.urgent && (
-                                  <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full flex items-center gap-1">
+                                  <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">
                                     <FaExclamationCircle />
                                     Urgent
                                   </span>
@@ -480,7 +518,7 @@ export default function MyTasks() {
                                 </span>
                               </div>
                               
-                              <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                              <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
                                 <span className="flex items-center gap-1">
                                   <FaMapMarkerAlt />
                                   {task.location}
@@ -496,23 +534,23 @@ export default function MyTasks() {
                               </div>
                             </div>
                             
-                            <div className="lg:hidden text-2xl font-bold text-green-600 mb-3">
+                            <div className="mb-3 text-2xl font-bold text-green-600 lg:hidden">
                               {task.amount}
                             </div>
                           </div>
 
-                          <p className="text-gray-700 mb-4">{task.description}</p>
+                          <p className="mb-4 text-gray-700">{task.description}</p>
 
                           {/* Progress & Details */}
                           <div className="flex flex-wrap items-center gap-6">
                             {task.progress > 0 && (
                               <div className="flex items-center gap-3">
                                 <div className="w-32">
-                                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                                  <div className="flex justify-between mb-1 text-xs text-gray-600">
                                     <span>Progress</span>
                                     <span>{task.progress}%</span>
                                   </div>
-                                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div className="h-2 overflow-hidden bg-gray-200 rounded-full">
                                     <div 
                                       className={`h-full rounded-full ${
                                         task.status === "completed" ? "bg-green-500" :
@@ -551,7 +589,7 @@ export default function MyTasks() {
 
                           {/* Rating & Review for Completed Tasks */}
                           {task.status === "completed" && task.rating && (
-                            <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                            <div className="p-4 mt-4 border border-green-200 bg-green-50 rounded-xl">
                               <div className="flex items-center gap-3 mb-2">
                                 <div className="flex items-center gap-1">
                                   <FaStar className="text-yellow-400" />
@@ -559,14 +597,14 @@ export default function MyTasks() {
                                 </div>
                                 <span className="text-sm text-gray-600">Review from {task.postedBy}</span>
                               </div>
-                              <p className="text-gray-700 italic">"{task.review}"</p>
+                              <p className="italic text-gray-700">"{task.review}"</p>
                             </div>
                           )}
 
                           {/* Cancellation Reason */}
                           {task.status === "cancelled" && task.reason && (
-                            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-200">
-                              <div className="flex items-center gap-2 text-red-700 mb-2">
+                            <div className="p-4 mt-4 border border-red-200 bg-red-50 rounded-xl">
+                              <div className="flex items-center gap-2 mb-2 text-red-700">
                                 <FaExclamationCircle />
                                 <span className="font-medium">Cancellation Reason:</span>
                               </div>
@@ -576,50 +614,50 @@ export default function MyTasks() {
                         </div>
 
                         {/* Right Actions */}
-                        <div className="lg:w-48 flex flex-col gap-3">
-                          <div className="hidden lg:block text-2xl font-bold text-green-600 text-right">
+                        <div className="flex flex-col gap-3 lg:w-48">
+                          <div className="hidden text-2xl font-bold text-right text-green-600 lg:block">
                             {task.amount}
                           </div>
                           
                           <div className="flex flex-col gap-2">
-                            <button className="w-full py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all flex items-center justify-center gap-2">
+                            <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-all rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
                               <FaEye />
                               View Details
                             </button>
                             
                             {task.status === "in-progress" && (
-                              <button className="w-full py-2 rounded-lg border border-green-500 text-green-600 hover:bg-green-50 transition-colors flex items-center justify-center gap-2">
+                              <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
                                 <FaCheckCircle />
                                 Mark Complete
                               </button>
                             )}
                             
                             {task.status === "accepted" && (
-                              <button className="w-full py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                              <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700">
                                 <FaComment />
                                 Message
                               </button>
                             )}
                             
-                            {(task.status === "pending-approval" || task.status === "negotiating") && (
-                              <div className="flex gap-2">
-                                <button className="flex-1 py-2 rounded-lg border border-green-500 text-green-600 hover:bg-green-50 transition-colors">
-                                  Accept
-                                </button>
-                                <button className="flex-1 py-2 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 transition-colors">
-                                  Decline
-                                </button>
-                              </div>
-                            )}
+{(task.status === "pending-approval" || task.status === "negotiating") && (
+<div className="flex gap-2">
+<button className="flex-1 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
+Accept
+</button>
+<button className="flex-1 py-2 text-white transition-colors bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">
+Decline
+</button>
+</div>
+)}
                             
                             <div className="flex gap-2">
-                              <button className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
                                 <FaEdit />
                               </button>
-                              <button className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
                                 <FaShare />
                               </button>
-                              <button className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors">
+                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
                                 <FaTrash />
                               </button>
                             </div>
@@ -633,26 +671,28 @@ export default function MyTasks() {
                 {/* Empty State */}
                 {(!tasks[activeTab] || tasks[activeTab].length === 0) && (
                   <div className="p-12 text-center">
-                    <div className="text-gray-400 text-5xl mb-4">
+                    <div className="mb-4 text-5xl text-gray-400">
                       {activeTab === "active" && <FaClock />}
                       {activeTab === "pending" && <FaExclamationCircle />}
                       {activeTab === "completed" && <FaCheckCircle />}
                       {activeTab === "cancelled" && <FaTimesCircle />}
+                      {activeTab === "posted" && <FaPlusCircle />}
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <h3 className="mb-2 text-xl font-bold text-gray-900">
                       No {activeTab} tasks found
                     </h3>
-                    <p className="text-gray-600 mb-6">
+                    <p className="mb-6 text-gray-600">
                       {activeTab === "active" && "You don't have any active tasks right now."}
                       {activeTab === "pending" && "No pending tasks at the moment."}
                       {activeTab === "completed" && "You haven't completed any tasks yet."}
                       {activeTab === "cancelled" && "No cancelled tasks."}
+                      {activeTab === "posted" && "You haven't posted any tasks yet."}
                     </p>
                     <Link
-                      to="/tasks"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all"
+                      to={activeTab === "posted" ? "/post-task" : "/tasks"}
+                      className="inline-flex items-center gap-2 px-6 py-3 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                     >
-                      Browse Available Tasks
+                      {activeTab === "posted" ? "Post Your First Task" : "Browse Available Tasks"}
                       <FaArrowRight />
                     </Link>
                   </div>
@@ -665,9 +705,9 @@ export default function MyTasks() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6"
+              className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3"
             >
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+              <div className="p-6 border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <FaClock className="text-2xl text-blue-500" />
                   <div>
@@ -678,7 +718,7 @@ export default function MyTasks() {
                 <div className="text-3xl font-bold text-gray-900">15 mins</div>
               </div>
 
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+              <div className="p-6 border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <FaCheckCircle className="text-2xl text-green-500" />
                   <div>
@@ -689,7 +729,7 @@ export default function MyTasks() {
                 <div className="text-3xl font-bold text-gray-900">96%</div>
               </div>
 
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
+              <div className="p-6 border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <FaStar className="text-2xl text-purple-500" />
                   <div>

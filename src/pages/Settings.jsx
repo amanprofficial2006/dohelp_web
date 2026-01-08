@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+  import { useState, useEffect } from "react";
 import {
   FaUser,
   FaBell,
@@ -68,7 +68,12 @@ export default function Settings() {
     name: "",
     email: "",
     phone: "",
-    location: "",
+    houseBuilding: "",
+    streetArea: "",
+    landmark: "",
+    city: "",
+    state: "",
+    pin: "",
     joinDate: "",
     language: "English",
     timezone: "IST (UTC+5:30)",
@@ -107,12 +112,24 @@ export default function Settings() {
             const responseData = await response.json();
             if (responseData.status) {
               const profileData = responseData.data;
+
+              // Parse location string back into individual fields
+              let locationParts = [];
+              if (profileData.location) {
+                locationParts = profileData.location.split(',').map(part => part.trim());
+              }
+
               setUserData(prevData => ({
                 ...prevData,
                 name: profileData.name || prevData.name,
                 email: profileData.email || prevData.email,
                 phone: profileData.phone || prevData.phone,
-                location: profileData.location || prevData.location,
+                houseBuilding: locationParts[0] || prevData.houseBuilding,
+                streetArea: locationParts[1] || prevData.streetArea,
+                landmark: locationParts[2] || prevData.landmark,
+                city: locationParts[3] || prevData.city,
+                state: locationParts[4] || prevData.state,
+                pin: locationParts[5] || prevData.pin,
                 bio: profileData.description || prevData.bio,
                 coverImage: profileData.cover_image_url || prevData.coverImage,
                 profileImage: profileData.profile_image_url || prevData.profileImage,
@@ -134,12 +151,18 @@ export default function Settings() {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        location: user.location || "",
+        houseBuilding: "",
+        streetArea: "",
+        landmark: "",
+        city: "",
+        state: "",
+        pin: "",
         joinDate: user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "",
         language: "English",
         timezone: "IST (UTC+5:30)",
         bio: user.description || "",
-        coverImage: ""
+        coverImage: "",
+        profileImage: ""
       });
       fetchProfile();
       console.log('Setting userData.bio to:', user.bio || "");
@@ -179,11 +202,16 @@ export default function Settings() {
         throw new Error('No authentication token found');
       }
 
+      // Concatenate location fields into a single string
+      const locationString = [userData.houseBuilding, userData.streetArea, userData.landmark, userData.city, userData.state, userData.pin]
+        .filter(field => field && field.trim() !== '')
+        .join(', ');
+
       const formData = new FormData();
       formData.append('name', userData.name);
       formData.append('email', userData.email);
       formData.append('phone_number', userData.phone);
-      formData.append('location', userData.location);
+      formData.append('location', locationString);
       formData.append('bio', userData.bio);
 
       if (selectedProfileImage) {
@@ -628,19 +656,84 @@ export default function Settings() {
 
 
 
-                            <div className="md:col-span-2">
+                            <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 <span className="flex items-center gap-2">
                                   <FaMapMarkerAlt className="text-blue-500" />
-                                  Location
+                                  House/Building
                                 </span>
                               </label>
                               <input
                                 type="text"
-                                value={userData.location}
-                                onChange={(e) => handleUserDataChange('location', e.target.value)}
+                                value={userData.houseBuilding}
+                                onChange={(e) => handleUserDataChange('houseBuilding', e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                placeholder="Enter your location"
+                                placeholder="Enter house/building name"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Street/Area
+                              </label>
+                              <input
+                                type="text"
+                                value={userData.streetArea}
+                                onChange={(e) => handleUserDataChange('streetArea', e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                placeholder="Enter street/area"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Landmark
+                              </label>
+                              <input
+                                type="text"
+                                value={userData.landmark}
+                                onChange={(e) => handleUserDataChange('landmark', e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                placeholder="Enter landmark"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                City
+                              </label>
+                              <input
+                                type="text"
+                                value={userData.city}
+                                onChange={(e) => handleUserDataChange('city', e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                placeholder="Enter city"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                State
+                              </label>
+                              <input
+                                type="text"
+                                value={userData.state}
+                                onChange={(e) => handleUserDataChange('state', e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                placeholder="Enter state"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                PIN Code
+                              </label>
+                              <input
+                                type="text"
+                                value={userData.pin}
+                                onChange={(e) => handleUserDataChange('pin', e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                placeholder="Enter PIN code"
                               />
                             </div>
 
