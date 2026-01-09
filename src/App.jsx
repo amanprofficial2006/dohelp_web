@@ -56,7 +56,7 @@ function App() {
             <Route path="/" element={<RootRedirect />} />
             <Route path="/post-task" element={<PostTask />} />
             <Route path="/tasks" element={<NearbyTasks />} />
-            <Route path="/task/:id" element={<TaskDetail />} />
+            <Route path="/task-detail/:id" element={<TaskDetail />} />
             <Route path="/my-tasks" element={<MyTasks />} />
             <Route path="/posted-tasks" element={<PostedTasks />} />
             <Route path="/profile" element={<Profile />} />

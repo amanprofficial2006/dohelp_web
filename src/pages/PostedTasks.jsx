@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaFilter,
@@ -8,7 +8,6 @@ import {
   FaTimesCircle,
   FaExclamationCircle,
   FaMoneyBillWave,
-  FaStar,
   FaMapMarkerAlt,
   FaCalendarAlt,
   FaUser,
@@ -16,7 +15,6 @@ import {
   FaPlusCircle,
   FaEllipsisH,
   FaEye,
-  FaEdit,
   FaTrash,
   FaShare,
   FaPhone,
@@ -30,44 +28,113 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PostedTasks() {
+  const navigate = useNavigate();
   const [sortBy, setSortBy] = useState("recent");
   const [showFilters, setShowFilters] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const tasks = [
-    {
-      id: 9,
-      title: "Home Cleaning Service Needed",
-      description: "Need someone to clean my 2BHK apartment thoroughly",
-      category: "Cleaning",
-      amount: "₹1,200",
-      location: "Andheri West",
-      postedTime: "2 days ago",
-      deadline: "This Weekend",
-      status: "open",
-      offers: 4,
-      acceptedBy: null,
-      urgent: false
-    },
-    {
-      id: 10,
-      title: "Grocery Shopping & Delivery",
-      description: "Need groceries picked up from supermarket and delivered",
-      category: "Delivery",
-      amount: "₹500",
-      location: "Powai to Andheri",
-      postedTime: "1 day ago",
-      deadline: "Tomorrow",
-      status: "assigned",
-      offers: 6,
-      acceptedBy: "Rajesh Kumar",
-      acceptedByRating: 4.8,
-      urgent: true
-    },
-  ];
+  const getPostedTime = (createdAt) => {
+    const now = new Date();
+    const created = new Date(createdAt);
+    const diffMs = now - created;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) {
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours === 0) {
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        return diffMinutes === 0 ? 'Just now' : `${diffMinutes} minutes ago`;
+      } else {
+        return `${diffHours} hours ago`;
+      }
+    }
+    if (diffDays === 1) return '1 day ago';
+    return `${diffDays} days ago`;
+  };
+
+  const formatDateTime = (dateString) => {
+    console.log('formatDateTime called with:', dateString);
+    if (!dateString || dateString === null || dateString === undefined) {
+      console.log('Date string is null/undefined/empty');
+      return 'Date not available';
+    }
+    try {
+      let date;
+
+      // Handle ISO format with microseconds like "2026-01-08T10:16:19.000000Z"
+      if (typeof dateString === 'string' && dateString.includes('T') && dateString.includes('Z')) {
+        // Remove microseconds (anything after the first 3 digits after the dot)
+        const cleanDate = dateString.replace(/(\.\d{3})\d*Z$/, '$1Z');
+        console.log('Cleaned date string:', cleanDate);
+        date = new Date(cleanDate);
+        console.log('Parsed date:', date, 'isNaN:', isNaN(date.getTime()));
+        if (!isNaN(date.getTime())) {
+          const formatted = `${date.toLocaleDateString('en-IN')} at ${date.toLocaleTimeString('en-IN')}`;
+          console.log('Formatted date:', formatted);
+          return formatted;
+        }
+      }
+
+      // If it's already a valid date string
+      date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return `${date.toLocaleDateString('en-IN')} at ${date.toLocaleTimeString('en-IN')}`;
+      }
+
+      return 'Invalid Date';
+    } catch (error) {
+      console.log('Error parsing date:', error);
+      return 'Invalid Date';
+    }
+  };
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+
+    fetch('https://dohelp.newhopeindia17.com/api/post-task', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('API Response:', data); // Debug log
+        if (data.success) {
+          const mappedTasks = data.tasks.map(task => {
+            console.log('Task created_at:', task.created_at); // Debug log
+            return {
+              id: task.id,
+              title: task.title,
+              description: task.description,
+              category: task.category,
+              amount: `₹${task.amount}`,
+              location: task.location,
+              created_at: task.created_at,
+              postedTime: getPostedTime(task.created_at),
+              deadline: new Date(task.deadline).toLocaleDateString(),
+              status: task.status,
+              offers: 0,
+              acceptedBy: null,
+              urgent: task.urgency_level === 'urgent'
+            };
+          });
+          setTasks(mappedTasks);
+        } else {
+          setError('Failed to fetch tasks');
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   const statusColors = {
     "open": "bg-green-100 text-green-700",
-    "assigned": "bg-blue-100 text-blue-700",
+    "assigned": "bg-orange-100 text-orange-700",
     "in-progress": "bg-blue-100 text-blue-700",
     "completed": "bg-emerald-100 text-emerald-700",
     "cancelled": "bg-red-100 text-red-700"
@@ -93,7 +160,7 @@ export default function PostedTasks() {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-blue-50 md:p-6">
+    <div className="min-h-screen p-4 md:p-6 bg-gradient-to-b from-gray-50 to-blue-50">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div
@@ -112,7 +179,7 @@ export default function PostedTasks() {
             <div className="flex items-center gap-4">
               <Link
                 to="/post-task"
-                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl hover:scale-105"
               >
                 <FaPlusCircle className="text-white" />
                 <span className="text-white">Post New Task</span>
@@ -122,7 +189,7 @@ export default function PostedTasks() {
 
           {/* Stats Overview */}
           <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
-            <div className="p-4 bg-white border border-gray-200 rounded-2xl">
+            <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-bold text-gray-900">{tasks.length}</span>
                 <span className="px-2 py-1 text-xs text-indigo-600 bg-indigo-100 rounded-full">
@@ -132,7 +199,7 @@ export default function PostedTasks() {
               <div className="text-sm text-gray-600">Tasks Posted</div>
             </div>
 
-            <div className="p-4 bg-white border border-gray-200 rounded-2xl">
+            <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-bold text-gray-900">{tasks.filter(t => t.status === 'open').length}</span>
                 <span className="px-2 py-1 text-xs text-green-600 bg-green-100 rounded-full">
@@ -142,17 +209,17 @@ export default function PostedTasks() {
               <div className="text-sm text-gray-600">Awaiting Offers</div>
             </div>
 
-            <div className="p-4 bg-white border border-gray-200 rounded-2xl">
+            <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-bold text-gray-900">{tasks.filter(t => t.status === 'assigned').length}</span>
-                <span className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">
+                <span className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full">
                   Assigned
                 </span>
               </div>
               <div className="text-sm text-gray-600">In Progress</div>
             </div>
 
-            <div className="p-4 bg-white border border-gray-200 rounded-2xl">
+            <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-bold text-gray-900">{tasks.filter(t => t.status === 'completed').length}</span>
                 <span className="px-2 py-1 text-xs rounded-full text-emerald-600 bg-emerald-100">
@@ -174,7 +241,7 @@ export default function PostedTasks() {
               className="space-y-6"
             >
               {/* Search & Filter */}
-              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
+              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
                 <h2 className="mb-4 text-lg font-bold text-gray-900">Filter Tasks</h2>
 
                 <div className="space-y-4">
@@ -187,7 +254,7 @@ export default function PostedTasks() {
                       <input
                         type="text"
                         placeholder="Search tasks..."
-                        className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full py-2 pl-10 pr-4 transition-colors bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -197,7 +264,7 @@ export default function PostedTasks() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setSortBy("recent")}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium ${
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                           sortBy === "recent"
                             ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -208,7 +275,7 @@ export default function PostedTasks() {
                       </button>
                       <button
                         onClick={() => setSortBy("amount")}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium ${
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                           sortBy === "amount"
                             ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -243,19 +310,19 @@ export default function PostedTasks() {
               </div>
 
               {/* Quick Actions */}
-              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
+              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
                 <h2 className="mb-4 text-lg font-bold text-gray-900">Quick Actions</h2>
                 <div className="space-y-3">
-                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50">
-                    <span className="font-medium text-gray-900">View All Offers</span>
+                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50">
+                    <span className="font-medium">View All Offers</span>
                     <span className="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full">5 new</span>
                   </button>
-                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50">
-                    <span className="font-medium text-gray-900">Pending Payments</span>
-                    <span className="px-2 py-1 text-xs text-green-700 bg-green-100 rounded-full">₹2,500</span>
+                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50">
+                    <span className="font-medium">Pending Payments</span>
+                    <span className="px-2 py-1 text-xs text-orange-700 bg-orange-100 rounded-full">₹2,500</span>
                   </button>
-                  <button className="flex items-center justify-between w-full p-3 transition-colors border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50">
-                    <span className="font-medium text-gray-900">Awaiting Reviews</span>
+                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50">
+                    <span className="font-medium">Awaiting Reviews</span>
                     <span className="px-2 py-1 text-xs text-purple-700 bg-purple-100 rounded-full">3 tasks</span>
                   </button>
                 </div>
@@ -268,111 +335,133 @@ export default function PostedTasks() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl"
+              className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm"
             >
+              {/* Loading State */}
+              {loading && (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="w-12 h-12 mx-auto mb-4 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                    <p className="text-gray-600">Loading tasks...</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <div className="p-8 text-center">
+                  <div className="mb-4 text-red-500">
+                    <FaTimesCircle className="mx-auto mb-2 text-4xl" />
+                    <p className="text-lg font-semibold">Error loading tasks</p>
+                  </div>
+                  <p className="text-gray-600">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+
               {/* Tasks List */}
-              <div className="divide-y divide-gray-100">
-                <AnimatePresence mode="wait">
-                  {tasks.map((task) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-6 transition-colors hover:bg-gray-50"
-                    >
-                      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-                        {/* Left Content */}
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+              {!loading && !error && (
+                <div className="divide-y divide-gray-100">
+                  {tasks.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <FaPlusCircle className="mx-auto mb-4 text-4xl text-gray-400" />
+                      <p className="mb-4 text-gray-600">No tasks posted yet</p>
+                      <Link
+                        to="/post-task"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                      >
+                        <FaPlusCircle />
+                        Post Your First Task
+                      </Link>
+                    </div>
+                  ) : (
+                    <AnimatePresence>
+                      {tasks.map((task) => (
+                        <motion.div
+                          key={task.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="p-6 transition-all duration-300 bg-white border border-gray-200 shadow-lg rounded-2xl hover:shadow-2xl hover:bg-gradient-to-br hover:from-white hover:to-gray-50 hover:scale-105"
+                        >
+                          <div className="flex flex-col gap-4">
+                            {/* Top row: Title and amount */}
+                            <div className="flex items-start justify-between">
+                              <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+                              <div className="text-2xl font-bold text-green-600">
+                                {task.amount}
+                              </div>
+                            </div>
+
+                            {/* Second row: Description */}
+                            <p className="text-gray-700">{task.description}</p>
+
+                            {/* Third row: Category, posted time, deadline */}
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <FaMoneyBillWave />
+                                {task.category}
+                              </span>
+                              <span className="flex items-center gap-1 font-semibold text-blue-600">
+                                <FaClock className="text-blue-500" />
+                                Posted {task.postedTime}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <FaCalendarAlt />
+                                Deadline: {task.deadline}
+                              </span>
+                            </div>
+
+                            {/* Fourth row: Location */}
+                            <div className="text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <FaMapMarkerAlt />
+                                {task.location}
+                              </span>
+                            </div>
+
+                            {/* Bottom row: Actions on left, status and urgency on right */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Link
+                                  to={`/task-detail/${task.id}`}
+                                  className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50"
+                                >
+                                  <FaEye />
+                                  View Details
+                                </Link>
+                                <button className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50">
+                                  <FaTrash />
+                                  Delete
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2">
                                 {task.urgent && (
-                                  <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">
+                                  <span className="flex items-center gap-1 px-3 py-2 text-sm text-red-700 bg-red-100 rounded-full">
                                     <FaExclamationCircle />
                                     Urgent
                                   </span>
                                 )}
-                                <span className={`px-3 py-1 text-xs rounded-full ${statusColors[task.status]}`}>
+                                <span className={`px-4 py-2 text-sm rounded-full ${statusColors[task.status]}`}>
                                   <span className="flex items-center gap-1">
                                     {statusIcons[task.status]}
                                     {getStatusText(task.status)}
                                   </span>
                                 </span>
                               </div>
-
-                              <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
-                                <span className="flex items-center gap-1">
-                                  <FaMapMarkerAlt />
-                                  {task.location}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <FaCalendarAlt />
-                                  Posted {task.postedTime}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="mb-3 text-2xl font-bold text-green-600 lg:hidden">
-                              {task.amount}
                             </div>
                           </div>
-
-                          <p className="mb-4 text-gray-700">{task.description}</p>
-
-                          {/* Task Details */}
-                          <div className="flex flex-wrap items-center gap-6">
-                            <div className="flex items-center gap-4">
-                              {task.offers > 0 && (
-                                <span className="flex items-center gap-1 text-sm text-gray-600">
-                                  <FaThumbsUp />
-                                  {task.offers} offers
-                                </span>
-                              )}
-                              <span className="flex items-center gap-1 text-sm text-gray-600">
-                                <FaCalendarAlt />
-                                Deadline: {task.deadline}
-                              </span>
-                              <span className="flex items-center gap-1 text-sm text-gray-600">
-                                <FaMoneyBillWave />
-                                {task.category}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex flex-wrap items-center gap-2">
-                            <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50">
-                              <FaEye />
-                              View Details
-                            </button>
-                            {task.status === 'open' && (
-                              <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 border border-green-300 rounded-lg hover:bg-green-50">
-                                <FaEdit />
-                                Edit
-                              </button>
-                            )}
-                            <button className="flex items-center gap-1 px-3 py-1 text-sm text-purple-600 border border-purple-300 rounded-lg hover:bg-purple-50">
-                              <FaShare />
-                              Share
-                            </button>
-                            <button className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50">
-                              <FaTrash />
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Right Content - Amount */}
-                        <div className="hidden text-right lg:block">
-                          <span className="text-2xl font-bold text-green-600">{task.amount}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
         </div>
