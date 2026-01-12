@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useCategories } from "../contexts/CategoriesContext";
+import { useTasks } from "../contexts/TasksContext";
 import { 
   FaSearch, 
   FaFilter, 
@@ -27,6 +29,8 @@ import { motion } from "framer-motion";
 
 export default function NearbyTasks() {
   const { user } = useAuth();
+  const { categories, loading: categoriesLoading } = useCategories();
+  const { userTasks, loading: tasksLoading } = useTasks();
   const [activeTab, setActiveTab] = useState("all");
   const [userStats, setUserStats] = useState({
     completedTasks: 12,
@@ -34,93 +38,81 @@ export default function NearbyTasks() {
     rating: 4.8,
     activeTasks: 3
   });
+  const [nearbyTasks, setNearbyTasks] = useState([]);
+  const [loadingNearby, setLoadingNearby] = useState(true);
+  const [errorNearby, setErrorNearby] = useState(null);
 
-  const categories = [
-    { icon: <FaShoppingBag />, name: "Delivery", count: 45, color: "bg-blue-100 text-blue-600" },
-    { icon: <FaBroom />, name: "Cleaning", count: 32, color: "bg-green-100 text-green-600" },
-    { icon: <FaLaptop />, name: "Online Help", count: 28, color: "bg-purple-100 text-purple-600" },
-    { icon: <FaCar />, name: "Rides", count: 19, color: "bg-orange-100 text-orange-600" },
-    { icon: <FaHome />, name: "Home Services", count: 26, color: "bg-red-100 text-red-600" },
-    { icon: <FaHandshake />, name: "Handyman", count: 37, color: "bg-yellow-100 text-yellow-600" },
-  ];
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const created = new Date(dateString);
+    const diffMs = now - created;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
 
-  const tasks = [
-    { 
-      id: 1, 
-      title: "Groceries Delivery", 
-      description: "Need groceries delivered from supermarket to home", 
-      amount: "₹300", 
-      location: "2 km away", 
-      time: "1 hour ago",
-      category: "Delivery",
-      urgent: true,
-      userRating: 4.9
-    },
-    { 
-      id: 2, 
-      title: "Home Cleaning", 
-      description: "2BHK apartment cleaning service needed", 
-      amount: "₹800", 
-      location: "3 km away", 
-      time: "2 hours ago",
-      category: "Cleaning",
-      urgent: false,
-      userRating: 4.7
-    },
-    { 
-      id: 3, 
-      title: "Website Design Help", 
-      description: "Need help with WordPress website setup", 
-      amount: "₹1500", 
-      location: "Remote", 
-      time: "3 hours ago",
-      category: "Online Help",
-      urgent: true,
-      userRating: 5.0
-    },
-    { 
-      id: 4, 
-      title: "Furniture Assembly", 
-      description: "Help with IKEA furniture assembly", 
-      amount: "₹600", 
-      location: "1 km away", 
-      time: "4 hours ago",
-      category: "Handyman",
-      urgent: false,
-      userRating: 4.8
-    },
-  ];
+    if (diffHours < 1) return 'Just now';
+    if (diffHours === 1) return '1 hour ago';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
 
-  const yourTasks = [
-    { 
-      id: 101, 
-      title: "Office Documents Delivery", 
-      status: "in-progress", 
-      amount: "₹450", 
-      time: "Today, 3:00 PM",
-      progress: 60
-    },
-    { 
-      id: 102, 
-      title: "Pet Sitting", 
-      status: "pending", 
-      amount: "₹1200", 
-      time: "Tomorrow, 10:00 AM",
-      progress: 30
-    },
-    { 
-      id: 103, 
-      title: "Gardening Help", 
-      status: "completed", 
-      amount: "₹900", 
-      time: "Yesterday",
-      progress: 100
-    },
-  ];
+    // After 7 days, show the actual date
+    return created.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: created.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    });
+  };
+
+  useEffect(() => {
+    const fetchNearbyTasks = async () => {
+      try {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+          setErrorNearby('Authentication required');
+          setLoadingNearby(false);
+          return;
+        }
+
+        const response = await fetch('https://dohelp.newhopeindia17.com/api/tasks/nearby', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          const transformedTasks = data.tasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            amount: `₹${task.amount}`,
+            location: task.location,
+            time: formatTimeAgo(task.created_at),
+            category: task.category,
+            urgent: task.urgency_level === 'urgent'
+          }));
+          setNearbyTasks(transformedTasks);
+        } else {
+          setErrorNearby(data.message || 'Failed to fetch nearby tasks');
+        }
+      } catch (error) {
+        setErrorNearby('Failed to fetch nearby tasks');
+      } finally {
+        setLoadingNearby(false);
+      }
+    };
+    fetchNearbyTasks();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-blue-50 md:p-6">
+      <div className="mx-auto max-w-7xl">
         
         {/* Welcome Header */}
         <motion.div
@@ -128,9 +120,9 @@ export default function NearbyTasks() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
                 Welcome back, <span className="text-blue-600">{user?.name || 'User'}!</span>
               </h1>
               <p className="text-gray-600">
@@ -143,7 +135,7 @@ export default function NearbyTasks() {
               
               <Link
                 to="/post-task"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
               >
                 <FaPlusCircle className="text-white" />
                 <span className="text-white">Post a Task</span>
@@ -157,7 +149,7 @@ export default function NearbyTasks() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+          className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-2 lg:grid-cols-4"
         >
           {[
             { 
@@ -191,50 +183,50 @@ export default function NearbyTasks() {
           ].map((stat, index) => (
             <div key={index} className={`${stat.color} rounded-2xl p-6 border shadow-sm`}>
               <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-white">
+                <div className="p-3 bg-white rounded-xl">
                   {stat.icon}
                 </div>
-                <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                <span className="px-2 py-1 text-sm font-semibold text-green-600 bg-green-100 rounded-full">
                   {stat.change}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+              <div className="mb-1 text-2xl font-bold text-gray-900">{stat.value}</div>
               <div className="text-sm text-gray-600">{stat.title}</div>
             </div>
           ))}
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-3">
           {/* Left Column - Available Tasks */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+              className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
               {/* Tasks Header */}
               <div className="p-6 border-b border-gray-100">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div className="flex flex-col items-start justify-between gap-4 mb-4 md:flex-row md:items-center">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Available Tasks Near You</h2>
+                    <h2 className="mb-2 text-xl font-bold text-gray-900">Available Tasks Near You</h2>
                     <p className="text-gray-600">Tasks posted in your area</p>
                   </div>
                   
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <FaSearch className="text-gray-400" />
                       </div>
                       <input
                         type="text"
                         placeholder="Search tasks..."
-                        className="pl-10 pr-4 py-2 w-full md:w-64 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full py-2 pl-10 pr-4 border border-gray-300 md:w-64 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
-                    <button className="p-2 rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">
+                    <button className="p-2 transition-colors border border-gray-300 rounded-xl hover:bg-gray-50">
                       <FaFilter className="text-gray-600" />
                     </button>
                   </div>
@@ -279,66 +271,99 @@ export default function NearbyTasks() {
               
               {/* Tasks List */}
               <div className="divide-y divide-gray-100">
-                {tasks.map((task) => (
-                  <motion.div
-                    key={task.id}
-                    whileHover={{ scale: 1.005 }}
-                    className="p-6 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
-                          {task.urgent && (
-                            <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full flex items-center gap-1">
-                              <FaFire className="text-xs" />
-                              Urgent
-                            </span>
-                          )}
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            task.category === "Delivery" ? "bg-blue-100 text-blue-700" :
-                            task.category === "Cleaning" ? "bg-green-100 text-green-700" :
-                            task.category === "Online Help" ? "bg-purple-100 text-purple-700" :
-                            "bg-yellow-100 text-yellow-700"
-                          }`}>
-                            {task.category}
-                          </span>
+                {loadingNearby ? (
+                  // Loading skeleton for nearby tasks
+                  [...Array(3)].map((_, index) => (
+                    <div key={index} className="p-6 animate-pulse">
+                      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-48 h-6 bg-gray-300 rounded"></div>
+                            <div className="w-16 h-6 bg-gray-300 rounded-full"></div>
+                            <div className="w-20 h-6 bg-gray-300 rounded-full"></div>
+                          </div>
+                          <div className="mb-3">
+                            <div className="h-4 bg-gray-200 rounded-full"></div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-4 text-sm">
+                            <div className="w-24 h-4 bg-gray-300 rounded"></div>
+                            <div className="w-20 h-4 bg-gray-300 rounded"></div>
+                            <div className="w-16 h-4 bg-gray-300 rounded"></div>
+                          </div>
                         </div>
-                        
-                        <p className="text-gray-600 mb-3">{task.description}</p>
-                        
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <FaMapMarkerAlt className="text-gray-400" />
-                            {task.location}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <FaClock className="text-gray-400" />
-                            {task.time}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <FaStar className="text-yellow-400" />
-                            {task.userRating} ⭐
-                          </span>
+                        <div className="flex flex-col items-end gap-3">
+                          <div className="w-16 h-8 bg-gray-300 rounded"></div>
+                          <div className="w-24 h-10 bg-gray-300 rounded-xl"></div>
                         </div>
-                      </div>
-                      
-                      <div className="flex flex-col items-end gap-3">
-                        <div className="text-2xl font-bold text-green-600">{task.amount}</div>
-                        <button className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all">
-                          View Details
-                        </button>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
+                  ))
+                ) : errorNearby ? (
+                  <div className="p-6 text-center text-red-500">
+                    {errorNearby}
+                  </div>
+                ) : nearbyTasks.length > 0 ? (
+                  nearbyTasks.map((task) => (
+                    <motion.div
+                      key={task.id}
+                      whileHover={{ scale: 1.005 }}
+                      className="p-6 transition-colors hover:bg-gray-50"
+                    >
+                      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+                            {task.urgent && (
+                              <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">
+                                <FaFire className="text-xs" />
+                                Urgent
+                              </span>
+                            )}
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              task.category === "Delivery" ? "bg-blue-100 text-blue-700" :
+                              task.category === "Cleaning" ? "bg-green-100 text-green-700" :
+                              task.category === "Online Help" ? "bg-purple-100 text-purple-700" :
+                              "bg-yellow-100 text-yellow-700"
+                            }`}>
+                              {task.category}
+                            </span>
+                          </div>
+
+                          <p className="mb-3 text-gray-600">{task.description}</p>
+
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <FaMapMarkerAlt className="text-gray-400" />
+                              {task.location}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <FaClock className="text-gray-400" />
+                              {task.time}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-3">
+                          <div className="text-2xl font-bold text-green-600">{task.amount}</div>
+                          <button className="px-6 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    No nearby tasks available.
+                  </div>
+                )}
               </div>
               
               {/* View All Link */}
               <div className="p-6 border-t border-gray-100">
                 <Link
-                  to="/tasks"
-                  className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+                  to="/my-tasks"
+                  className="flex items-center justify-center gap-2 font-medium text-blue-600 hover:text-blue-700"
                 >
                   View All Available Tasks
                   <FaHandshake />
@@ -354,60 +379,79 @@ export default function NearbyTasks() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Your Tasks</h2>
-                <Link to="/my-tasks" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                <Link to="/posted-tasks" className="text-sm font-medium text-blue-600 hover:text-blue-700">
                   View All
                 </Link>
               </div>
               
               <div className="space-y-4">
-                {yourTasks.map((task) => (
-                  <div key={task.id} className="p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900">{task.title}</h3>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        task.status === "completed" ? "bg-green-100 text-green-700" :
-                        task.status === "in-progress" ? "bg-blue-100 text-blue-700" :
-                        "bg-yellow-100 text-yellow-700"
-                      }`}>
-                        {task.status}
-                      </span>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <div className="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Progress</span>
-                        <span>{task.progress}%</span>
+                {tasksLoading ? (
+                  // Loading skeleton for tasks
+                  [...Array(3)].map((_, index) => (
+                    <div key={index} className="p-4 border border-gray-200 rounded-xl animate-pulse">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-32 h-4 bg-gray-300 rounded"></div>
+                        <div className="w-16 h-6 bg-gray-300 rounded-full"></div>
                       </div>
-                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${
-                            task.status === "completed" ? "bg-green-500" :
-                            task.status === "in-progress" ? "bg-blue-500" :
-                            "bg-yellow-500"
-                          }`}
-                          style={{ width: `${task.progress}%` }}
-                        />
+                      <div className="mb-3">
+                        <div className="h-2 bg-gray-200 rounded-full"></div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="w-20 h-3 bg-gray-300 rounded"></div>
+                        <div className="w-16 h-4 bg-gray-300 rounded"></div>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">{task.time}</span>
-                      <span className="font-semibold text-green-600">{task.amount}</span>
+                  ))
+                ) : userTasks.length > 0 ? (
+                  userTasks.map((task) => (
+                    <div key={task.id} className="p-4 transition-colors border border-gray-200 rounded-xl hover:border-blue-300">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          task.status === "completed" ? "bg-green-100 text-green-700" :
+                          task.status === "in-progress" ? "bg-blue-100 text-blue-700" :
+                          "bg-yellow-100 text-yellow-700"
+                        }`}>
+                          {task.status}
+                        </span>
+                      </div>
+
+                      <div className="mb-3">
+                        <div className="flex justify-between mb-1 text-sm text-gray-600">
+                          <span>Progress</span>
+                          <span>{task.progress}%</span>
+                        </div>
+                        <div className="h-2 overflow-hidden bg-gray-200 rounded-full">
+                          <div
+                            className={`h-full rounded-full ${
+                              task.status === "completed" ? "bg-green-500" :
+                              task.status === "in-progress" ? "bg-blue-500" :
+                              "bg-yellow-500"
+                            }`}
+                            style={{ width: `${task.progress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">{task.time}</span>
+                        <span className="font-semibold text-green-600">{task.amount}</span>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-gray-500">
+                    <FaClock className="mx-auto mb-2 text-2xl" />
+                    <p>No tasks yet. Start by taking on some tasks!</p>
                   </div>
-                ))}
+                )}
               </div>
               
-              <button className="w-full mt-6 py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors">
-                <div className="flex items-center justify-center gap-2">
-                  <FaPlusCircle />
-                  <span>Take on New Task</span>
-                </div>
-              </button>
+              
             </motion.div>
             
             {/* Popular Categories */}
@@ -415,32 +459,46 @@ export default function NearbyTasks() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Popular Categories</h2>
-              
-              <div className="grid grid-cols-2 gap-3">
-                {categories.map((category, index) => (
-                  <Link
-                    key={index}
-                    to={`/tasks?category=${category.name.toLowerCase()}`}
-                    className="group p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-lg ${category.color}`}>
-                        {category.icon}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">{category.name}</h3>
-                        <p className="text-sm text-gray-500">{category.count} tasks</p>
+              <h2 className="mb-6 text-xl font-bold text-gray-900">Popular Categories</h2>
+
+              {categoriesLoading ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {[...Array(6)].map((_, index) => (
+                    <div key={index} className="p-4 border-2 border-gray-200 rounded-xl animate-pulse">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
+                        <div className="w-20 h-4 bg-gray-300 rounded"></div>
                       </div>
                     </div>
-                    <div className="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Browse tasks →
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {categories.map((category) => (
+                    <Link
+                      key={category.id}
+                      to={`/tasks?category=${category.name.toLowerCase()}`}
+                      className="p-4 transition-all border border-gray-200 group rounded-xl hover:border-blue-300 hover:bg-blue-50"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="object-cover w-12 h-12 rounded-lg"
+                        />
+                        <div>
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">{category.name}</h3>
+                        </div>
+                      </div>
+                      <div className="text-xs text-blue-600 transition-opacity opacity-0 group-hover:opacity-100">
+                        Browse tasks →
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </motion.div>
             
             {/* Quick Stats */}
@@ -448,43 +506,43 @@ export default function NearbyTasks() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white"
+              className="p-6 text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl"
             >
-              <h2 className="text-xl font-bold mb-6">Your Weekly Progress</h2>
+              <h2 className="mb-6 text-xl font-bold">Your Weekly Progress</h2>
               
               <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between mb-1 text-sm">
                     <span>Tasks Completed</span>
                     <span>4/6</span>
                   </div>
-                  <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-2 overflow-hidden rounded-full bg-white/30">
                     <div className="h-full bg-white rounded-full" style={{ width: "66%" }} />
                   </div>
                 </div>
                 
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between mb-1 text-sm">
                     <span>Earnings Goal</span>
                     <span>₹8,500/₹10,000</span>
                   </div>
-                  <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-2 overflow-hidden rounded-full bg-white/30">
                     <div className="h-full bg-green-300 rounded-full" style={{ width: "85%" }} />
                   </div>
                 </div>
                 
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between mb-1 text-sm">
                     <span>Rating Improvement</span>
                     <span>4.8/5.0</span>
                   </div>
-                  <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+                  <div className="h-2 overflow-hidden rounded-full bg-white/30">
                     <div className="h-full bg-yellow-300 rounded-full" style={{ width: "96%" }} />
                   </div>
                 </div>
               </div>
               
-              <div className="mt-6 pt-6 border-t border-white/20">
+              <div className="pt-6 mt-6 border-t border-white/20">
                 <div className="flex items-center justify-center gap-2">
                   <FaTrophy className="text-yellow-300" />
                   <span className="text-sm">On track to be Top Helper this week!</span>
@@ -499,13 +557,13 @@ export default function NearbyTasks() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100"
+          className="p-8 border border-blue-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          <h2 className="mb-6 text-2xl font-bold text-center text-gray-900">
             How DoHelp Works
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {[
               {
                 step: "1",
@@ -527,15 +585,15 @@ export default function NearbyTasks() {
               },
             ].map((step, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-2xl font-bold text-white rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500">
                   {step.step}
                 </div>
-                <div className="p-4 rounded-xl bg-white border border-gray-200">
-                  <div className="text-blue-600 mb-3 flex justify-center">
+                <div className="p-4 bg-white border border-gray-200 rounded-xl">
+                  <div className="flex justify-center mb-3 text-blue-600">
                     {step.icon}
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
+                  <h3 className="mb-2 font-bold text-gray-900">{step.title}</h3>
+                  <p className="text-sm text-gray-600">{step.description}</p>
                 </div>
               </div>
             ))}

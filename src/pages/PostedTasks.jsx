@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaSearch,
@@ -34,6 +35,7 @@ export default function PostedTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   const getPostedTime = (createdAt) => {
     const now = new Date();
@@ -52,6 +54,36 @@ export default function PostedTasks() {
     if (diffDays === 1) return '1 day ago';
     return `${diffDays} days ago`;
   };
+
+  const deleteTask = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+  const token = sessionStorage.getItem("token");
+
+  try {
+    const res = await fetch(`https://dohelp.newhopeindia17.com/api/tasks/delete/${id}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Task ko UI se hata do
+      setTasks((prev) => prev.filter((task) => task.id !== id));
+      toast.success("Task deleted successfully!");
+    } else {
+      toast.error(data.message || "Failed to delete task");
+    }
+  } catch (error) {
+    toast.error("Something went wrong");
+    console.error(error);
+  }
+};
+
 
   const formatDateTime = (dateString) => {
     console.log('formatDateTime called with:', dateString);
@@ -337,6 +369,56 @@ export default function PostedTasks() {
               animate={{ opacity: 1, y: 0 }}
               className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm"
             >
+              {/* Tasks Header */}
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex flex-col items-start justify-between gap-4 mb-4 md:flex-row md:items-center">
+                  <div>
+                    <h2 className="mb-2 text-xl font-bold text-gray-900">Your Posted Tasks</h2>
+                    <p className="text-gray-600">Manage and track your posted tasks</p>
+                  </div>
+                </div>
+
+                {/* Category Tabs */}
+                <div className="flex flex-wrap gap-2">
+                  {["all", "open", "assigned", "in-progress", "completed"].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        activeTab === tab
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {tab === "all" && "All Tasks"}
+                      {tab === "open" && (
+                        <span className="flex items-center gap-1">
+                          <FaCheckCircle className="text-green-500" />
+                          Open
+                        </span>
+                      )}
+                      {tab === "assigned" && (
+                        <span className="flex items-center gap-1">
+                          <FaClock className="text-blue-500" />
+                          Assigned
+                        </span>
+                      )}
+                      {tab === "in-progress" && (
+                        <span className="flex items-center gap-1">
+                          <FaClock className="text-blue-500" />
+                          In Progress
+                        </span>
+                      )}
+                      {tab === "completed" && (
+                        <span className="flex items-center gap-1">
+                          <FaCheckCircle className="text-emerald-500" />
+                          Completed
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {/* Loading State */}
               {loading && (
                 <div className="flex items-center justify-center p-8">
@@ -367,21 +449,30 @@ export default function PostedTasks() {
               {/* Tasks List */}
               {!loading && !error && (
                 <div className="divide-y divide-gray-100">
-                  {tasks.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <FaPlusCircle className="mx-auto mb-4 text-4xl text-gray-400" />
-                      <p className="mb-4 text-gray-600">No tasks posted yet</p>
-                      <Link
-                        to="/post-task"
-                        className="inline-flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                      >
-                        <FaPlusCircle />
-                        Post Your First Task
-                      </Link>
-                    </div>
-                  ) : (
-                    <AnimatePresence>
-                      {tasks.map((task) => (
+                  {(() => {
+                    const filteredTasks = activeTab === "all"
+                      ? tasks
+                      : tasks.filter(task => task.status === activeTab);
+
+                    return filteredTasks.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <FaPlusCircle className="mx-auto mb-4 text-4xl text-gray-400" />
+                        <p className="mb-4 text-gray-600">
+                          {activeTab === "all" ? "No tasks posted yet" : `No ${activeTab} tasks found`}
+                        </p>
+                        {activeTab === "all" && (
+                          <Link
+                            to="/post-task"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                          >
+                            <FaPlusCircle />
+                            Post Your First Task
+                          </Link>
+                        )}
+                      </div>
+                    ) : (
+                      <AnimatePresence>
+                        {filteredTasks.map((task) => (
                         <motion.div
                           key={task.id}
                           initial={{ opacity: 0, y: 10 }}
@@ -435,10 +526,15 @@ export default function PostedTasks() {
                                   <FaEye />
                                   View Details
                                 </Link>
-                                <button className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50">
-                                  <FaTrash />
-                                  Delete
-                                </button>
+<button
+  onClick={() => deleteTask(task.id)}
+  className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50"
+>
+  <FaTrash />
+  Delete
+</button>
+
+
                               </div>
                               <div className="flex items-center gap-2">
                                 {task.urgent && (
@@ -459,7 +555,8 @@ export default function PostedTasks() {
                         </motion.div>
                       ))}
                     </AnimatePresence>
-                  )}
+                  );
+                })()}
                 </div>
               )}
             </motion.div>

@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useCategories } from "../contexts/CategoriesContext";
+import { useTasks } from "../contexts/TasksContext";
 import {
   FaSearch,
   FaFilter,
@@ -24,22 +28,121 @@ import {
   FaChartLine,
   FaTrophy,
   FaSortAmountDown,
-  FaSortAmountUp
+  FaSortAmountUp,
+  FaFire
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MyTasks() {
-  const [activeTab, setActiveTab] = useState("active");
+  const { user } = useAuth();
+  const { categories, loading: categoriesLoading } = useCategories();
+  const { userTasks, postedTasks, loading: tasksLoading, postedTasksLoading } = useTasks();
+  const [activeTab, setActiveTab] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [nearbyTasks, setNearbyTasks] = useState([]);
+  const [loadingNearby, setLoadingNearby] = useState(true);
+  const [errorNearby, setErrorNearby] = useState(null);
 
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const created = new Date(dateString);
+    const diffMs = now - created;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 1) return 'Just now';
+    if (diffHours === 1) return '1 hour ago';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+
+    // After 7 days, show the actual date
+    return created.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: created.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    });
+  };
+
+  useEffect(() => {
+    const fetchNearbyTasks = async () => {
+      try {
+        const token = sessionStorage.getItem('token');
+        if (!token) {
+          setErrorNearby('Authentication required');
+          setLoadingNearby(false);
+          return;
+        }
+
+        const response = await fetch('https://dohelp.newhopeindia17.com/api/tasks/nearby', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          const transformedTasks = data.tasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            amount: `₹${task.amount}`,
+            location: task.location,
+            time: formatTimeAgo(task.created_at),
+            category: task.category,
+            urgent: task.urgency_level === 'urgent'
+          }));
+          setNearbyTasks(transformedTasks);
+        } else {
+          setErrorNearby(data.message || 'Failed to fetch nearby tasks');
+        }
+      } catch (error) {
+        setErrorNearby('Failed to fetch nearby tasks');
+      } finally {
+        setLoadingNearby(false);
+      }
+    };
+    fetchNearbyTasks();
+  }, []);
+
+  // Categorize tasks dynamically
+  const categorizeTasks = () => {
+    const activeTasks = userTasks.filter(task =>
+      ['in-progress', 'accepted', 'negotiating'].includes(task.status)
+    );
+    const pendingTasks = userTasks.filter(task =>
+      ['pending-approval', 'awaiting-payment'].includes(task.status)
+    );
+    const completedTasks = userTasks.filter(task => task.status === 'completed');
+    const cancelledTasks = userTasks.filter(task => task.status === 'cancelled');
+
+    return {
+      active: activeTasks,
+      pending: pendingTasks,
+      completed: completedTasks,
+      cancelled: cancelledTasks,
+      posted: postedTasks || [],
+      all: [...activeTasks, ...pendingTasks, ...completedTasks, ...cancelledTasks, ...(postedTasks || [])]
+    };
+  };
+
+  const tasks = categorizeTasks();
+
+  // Calculate dynamic stats
   const taskStats = {
-    active: 3,
-    pending: 2,
-    completed: 12,
-    cancelled: 1,
-    totalEarnings: 45600
+    active: tasks.active.length,
+    pending: tasks.pending.length,
+    completed: tasks.completed.length,
+    cancelled: tasks.cancelled.length,
+    totalEarnings: tasks.completed.reduce((sum, task) => sum + parseInt(task.amount.replace('₹', '')), 0)
   };
 
   const tabs = [
@@ -47,185 +150,8 @@ export default function MyTasks() {
     { id: "pending", label: "Pending", count: taskStats.pending, color: "text-yellow-600 bg-yellow-100" },
     { id: "completed", label: "Completed", count: taskStats.completed, color: "text-green-600 bg-green-100" },
     { id: "cancelled", label: "Cancelled", count: taskStats.cancelled, color: "text-red-600 bg-red-100" },
-    { id: "all", label: "All Tasks", count: 16, color: "text-purple-600 bg-purple-100" },
+    { id: "all", label: "All Tasks", count: tasks.all.length, color: "text-purple-600 bg-purple-100" },
   ];
-
-  const tasks = {
-    active: [
-      {
-        id: 1,
-        title: "Office Documents Delivery",
-        description: "Deliver important documents from Andheri to Bandra office",
-        category: "Delivery",
-        amount: "₹450",
-        location: "Andheri to Bandra",
-        postedBy: "Rajesh Kumar",
-        postedByRating: 4.8,
-        postedTime: "Today, 10:00 AM",
-        deadline: "Today, 6:00 PM",
-        status: "in-progress",
-        progress: 60,
-        urgent: true,
-        messages: 5,
-        offers: 3
-      },
-      {
-        id: 2,
-        title: "Pet Sitting - Golden Retriever",
-        description: "Need someone to take care of my dog for 4 hours",
-        category: "Pet Care",
-        amount: "₹800",
-        location: "Powai",
-        postedBy: "Anita Desai",
-        postedByRating: 4.9,
-        postedTime: "Yesterday",
-        deadline: "Tomorrow, 2:00 PM",
-        status: "accepted",
-        progress: 30,
-        urgent: false,
-        messages: 12,
-        offers: 1
-      },
-      {
-        id: 3,
-        title: "Math Tutoring for Class 10",
-        description: "Need help with algebra and geometry concepts",
-        category: "Tutoring",
-        amount: "₹1,200",
-        location: "Online",
-        postedBy: "Mrs. Sharma",
-        postedByRating: 5.0,
-        postedTime: "2 days ago",
-        deadline: "Next Week",
-        status: "negotiating",
-        progress: 20,
-        urgent: false,
-        messages: 8,
-        offers: 2
-      },
-    ],
-    pending: [
-      {
-        id: 4,
-        title: "Furniture Assembly",
-        description: "Help with assembling IKEA furniture (Bed + Wardrobe)",
-        category: "Handyman",
-        amount: "₹600",
-        location: "Malad",
-        postedBy: "Vikram Singh",
-        postedByRating: 4.7,
-        postedTime: "3 hours ago",
-        deadline: "Tomorrow",
-        status: "pending-approval",
-        progress: 10,
-        urgent: true,
-        messages: 0,
-        offers: 5
-      },
-      {
-        id: 5,
-        title: "Home Cleaning - 3BHK",
-        description: "Deep cleaning of 3BHK apartment before festival",
-        category: "Cleaning",
-        amount: "₹1,500",
-        location: "Juhu",
-        postedBy: "Priya Nair",
-        postedByRating: 4.9,
-        postedTime: "1 day ago",
-        deadline: "This Weekend",
-        status: "awaiting-payment",
-        progress: 0,
-        urgent: false,
-        messages: 3,
-        offers: 7
-      },
-    ],
-    completed: [
-      {
-        id: 6,
-        title: "Groceries Delivery",
-        description: "Weekly groceries from supermarket to home",
-        category: "Delivery",
-        amount: "₹300",
-        location: "Santacruz",
-        postedBy: "Rahul Verma",
-        postedByRating: 4.8,
-        postedTime: "1 week ago",
-        completedTime: "2 days ago",
-        status: "completed",
-        progress: 100,
-        rating: 5,
-        review: "Excellent service! Delivered on time and items were perfect.",
-        urgent: false
-      },
-      {
-        id: 7,
-        title: "Website Bug Fix",
-        description: "Fix responsive issues on WordPress website",
-        category: "Online Help",
-        amount: "₹2,000",
-        location: "Remote",
-        postedBy: "Tech Startup",
-        postedByRating: 4.9,
-        postedTime: "2 weeks ago",
-        completedTime: "1 week ago",
-        status: "completed",
-        progress: 100,
-        rating: 4,
-        review: "Good work, fixed the main issues. Will work with again.",
-        urgent: true
-      },
-    ],
-    cancelled: [
-      {
-        id: 8,
-        title: "Car Wash & Polish",
-        description: "Complete car wash and polishing service",
-        category: "Car Services",
-        amount: "₹1,000",
-        location: "Bandra",
-        postedBy: "Mohan Das",
-        postedByRating: 4.5,
-        postedTime: "5 days ago",
-        cancelledTime: "3 days ago",
-        status: "cancelled",
-        progress: 0,
-        reason: "Task poster changed requirements",
-        urgent: false
-      },
-    ],
-    posted: [
-      {
-        id: 9,
-        title: "Home Cleaning Service Needed",
-        description: "Need someone to clean my 2BHK apartment thoroughly",
-        category: "Cleaning",
-        amount: "₹1,200",
-        location: "Andheri West",
-        postedTime: "2 days ago",
-        deadline: "This Weekend",
-        status: "open",
-        offers: 4,
-        acceptedBy: null,
-        urgent: false
-      },
-      {
-        id: 10,
-        title: "Grocery Shopping & Delivery",
-        description: "Need groceries picked up from supermarket and delivered",
-        category: "Delivery",
-        amount: "₹500",
-        location: "Powai to Andheri",
-        postedTime: "1 day ago",
-        deadline: "Tomorrow",
-        status: "assigned",
-        offers: 6,
-        acceptedBy: "Rajesh Kumar",
-        acceptedByRating: 4.8,
-        urgent: true
-      },
-    ]
-  };
 
   const statusColors = {
     "in-progress": "bg-blue-100 text-blue-700",
@@ -417,6 +343,57 @@ export default function MyTasks() {
                 </div>
               </div>
 
+              {/* Nearby Tasks */}
+              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
+                <h2 className="mb-4 text-lg font-bold text-gray-900">Nearby Tasks</h2>
+
+                {loadingNearby ? (
+                  <div className="py-4 text-center">
+                    <div className="w-8 h-8 mx-auto border-b-2 border-blue-500 rounded-full animate-spin"></div>
+                    <p className="mt-2 text-sm text-gray-600">Loading nearby tasks...</p>
+                  </div>
+                ) : errorNearby ? (
+                  <div className="py-4 text-center">
+                    <FaExclamationCircle className="mx-auto mb-2 text-2xl text-red-500" />
+                    <p className="text-sm text-red-600">{errorNearby}</p>
+                  </div>
+                ) : nearbyTasks.length === 0 ? (
+                  <div className="py-4 text-center">
+                    <FaMapMarkerAlt className="mx-auto mb-2 text-2xl text-gray-400" />
+                    <p className="text-sm text-gray-600">No nearby tasks found</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {nearbyTasks.slice(0, 3).map((task) => (
+                      <div key={task.id} className="p-3 transition-colors border border-gray-100 rounded-lg hover:border-blue-200">
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-1">{task.title}</h4>
+                          <span className="text-sm font-bold text-green-600">{task.amount}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <FaMapMarkerAlt className="text-xs text-gray-400" />
+                          <span className="text-xs text-gray-600">{task.location}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500">{task.time}</span>
+                          {task.urgent && (
+                            <span className="px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">Urgent</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {nearbyTasks.length > 3 && (
+                      <Link
+                        to="/nearby-tasks"
+                        className="block py-2 text-sm font-medium text-center text-blue-600 hover:text-blue-700"
+                      >
+                        View all nearby tasks ({nearbyTasks.length})
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Quick Actions */}
               <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl">
                 <h2 className="mb-4 text-lg font-bold text-gray-900">Quick Actions</h2>
@@ -518,24 +495,24 @@ export default function MyTasks() {
                                 </span>
                               </div>
                               
-                              <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
                                 <span className="flex items-center gap-1">
                                   <FaMapMarkerAlt />
                                   {task.location}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <FaUser />
-                                  {task.postedBy} • {task.postedByRating} ⭐
+                                  {task.user_name || task.postedBy || 'Unknown'} • {task.user_rating || task.postedByRating || 0} ⭐
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <FaCalendarAlt />
-                                  {task.postedTime}
+                                  {task.created_at ? formatTimeAgo(task.created_at) : task.postedTime || 'Unknown'}
                                 </span>
                               </div>
                             </div>
                             
                             <div className="mb-3 text-2xl font-bold text-green-600 lg:hidden">
-                              {task.amount}
+                              {typeof task.amount === 'string' ? task.amount : `₹${task.amount}`}
                             </div>
                           </div>
 
@@ -613,57 +590,59 @@ export default function MyTasks() {
                           )}
                         </div>
 
-                        {/* Right Actions */}
-                        <div className="flex flex-col gap-3 lg:w-48">
-                          <div className="hidden text-2xl font-bold text-right text-green-600 lg:block">
-                            {task.amount}
-                          </div>
-                          
-                          <div className="flex flex-col gap-2">
-                            <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-all rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                              <FaEye />
-                              View Details
-                            </button>
-                            
-                            {task.status === "in-progress" && (
-                              <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
-                                <FaCheckCircle />
-                                Mark Complete
-                              </button>
-                            )}
-                            
-                            {task.status === "accepted" && (
-                              <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700">
-                                <FaComment />
-                                Message
-                              </button>
-                            )}
-                            
-{(task.status === "pending-approval" || task.status === "negotiating") && (
-<div className="flex gap-2">
-<button className="flex-1 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
-Accept
-</button>
-<button className="flex-1 py-2 text-white transition-colors bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">
-Decline
-</button>
+{/* Right Actions */}
+<div className="flex flex-col gap-3 lg:w-48">
+  <div className="hidden text-2xl font-bold text-right text-green-600 lg:block">
+    {task.amount}
+  </div>
+  
+  <div className="flex flex-col gap-2">
+    <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-all rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+      <FaEye />
+      View Details
+    </button>
+
+    {task.status === "in-progress" && (
+      <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
+        <FaCheckCircle />
+        Mark Complete
+      </button>
+    )}
+
+    {task.status === "accepted" && (
+      <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700">
+        <FaComment />
+        Message
+      </button>
+    )}
+
+    {(task.status === "pending-approval" || task.status === "negotiating") && (
+      <div className="flex gap-2">
+        <button className="flex-1 py-2 text-white transition-colors bg-green-600 border border-green-600 rounded-lg hover:bg-green-700">
+          Accept
+        </button>
+        <button className="flex-1 py-2 text-white transition-colors bg-red-600 border border-red-600 rounded-lg hover:bg-red-700">
+          Decline
+        </button>
+      </div>
+    )}
+
+    {activeTab !== "all" && (
+      <div className="flex gap-2">
+        <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
+          <FaEdit />
+        </button>
+        <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
+          <FaShare />
+        </button>
+        <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
+          <FaTrash />
+        </button>
+      </div>
+    )}
+  </div>
 </div>
-)}
-                            
-                            <div className="flex gap-2">
-                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <FaEdit />
-                              </button>
-                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <FaShare />
-                              </button>
-                              <button className="flex-1 py-2 text-gray-700 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50">
-                                <FaTrash />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+</div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -746,6 +725,3 @@ Decline
     </div>
   );
 }
-
-// Add missing import
-import { Link } from "react-router-dom";

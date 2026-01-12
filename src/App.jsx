@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CategoriesProvider } from "./contexts/CategoriesContext";
+import { TasksProvider } from "./contexts/TasksContext";
 import Layout from "./components/Layout";
 
 import Landing from "./pages/Landing";
@@ -45,7 +46,8 @@ function App() {
   return (
     <AuthProvider>
       <CategoriesProvider>
-        <BrowserRouter>
+        <TasksProvider>
+          <BrowserRouter>
           <Routes>
           {/* Login and Register pages without layout */}
           <Route path="/login" element={<Login />} />
@@ -80,6 +82,7 @@ function App() {
 
         </Routes>
       </BrowserRouter>
+    </TasksProvider>
     </CategoriesProvider>
     </AuthProvider>
   );
