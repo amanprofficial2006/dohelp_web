@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../contexts/CategoriesContext";
 import { useTasks } from "../contexts/TasksContext";
@@ -37,6 +37,7 @@ export default function MyTasks() {
   const { user } = useAuth();
   const { categories, loading: categoriesLoading } = useCategories();
   const { userTasks, postedTasks, loading: tasksLoading, postedTasksLoading } = useTasks();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [showFilters, setShowFilters] = useState(false);
@@ -44,6 +45,7 @@ export default function MyTasks() {
   const [nearbyTasks, setNearbyTasks] = useState([]);
   const [loadingNearby, setLoadingNearby] = useState(true);
   const [errorNearby, setErrorNearby] = useState(null);
+  const [acceptingTasks, setAcceptingTasks] = useState(new Set());
 
   const formatTimeAgo = (dateString) => {
     const now = new Date();
@@ -64,6 +66,54 @@ export default function MyTasks() {
       month: 'short',
       year: created.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
+  };
+
+  const formatDeadline = (deadlineString) => {
+    if (!deadlineString) return null;
+    const deadline = new Date(deadlineString);
+    return deadline.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const acceptTask = async (taskId) => {
+    setAcceptingTasks(prev => new Set(prev).add(taskId));
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const res = await fetch(`https://dohelp.newhopeindia17.com/api/tasks/accept/${taskId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Task accepted successfully!");
+        // Refresh the tasks list
+        setNearbyTasks(prev => prev.filter(task => task.id !== taskId));
+      } else {
+        alert(data.message || "Failed to accept task");
+      }
+    } catch (error) {
+      alert("Something went wrong");
+    } finally {
+      setAcceptingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(taskId);
+        return newSet;
+      });
+    }
+  };
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : categoryId;
   };
 
   useEffect(() => {
@@ -98,7 +148,18 @@ export default function MyTasks() {
             location: task.location,
             time: formatTimeAgo(task.created_at),
             category: task.category,
-            urgent: task.urgency_level === 'urgent'
+            urgent: task.urgency_level === 'urgent',
+            status: task.status || 'open',
+            user_name: task.user?.name || 'Nearby Task Poster',
+            user_rating: task.user?.rating || 0,
+            created_at: task.created_at,
+            progress: 0,
+            messages: 0,
+            offers: 0,
+            deadline: task.deadline,
+            rating: null,
+            review: null,
+            reason: null
           }));
           setNearbyTasks(transformedTasks);
         } else {
@@ -130,7 +191,7 @@ export default function MyTasks() {
       completed: completedTasks,
       cancelled: cancelledTasks,
       posted: postedTasks || [],
-      all: [...activeTasks, ...pendingTasks, ...completedTasks, ...cancelledTasks, ...(postedTasks || [])]
+      all: [...activeTasks, ...pendingTasks, ...completedTasks, ...cancelledTasks, ...nearbyTasks]
     };
   };
 
@@ -374,10 +435,27 @@ export default function MyTasks() {
                           <FaMapMarkerAlt className="text-xs text-gray-400" />
                           <span className="text-xs text-gray-600">{task.location}</span>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-gray-500">{task.time}</span>
                           {task.urgent && (
                             <span className="px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">Urgent</span>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/nearby-task-detail/${task.id}`)}
+                            className="flex-1 py-2 text-sm font-medium text-center text-blue-600 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200"
+                          >
+                            View Details
+                          </button>
+                          {task.status === 'open' && (
+                            <button
+                              onClick={() => acceptTask(task.id)}
+                              disabled={acceptingTasks.has(task.id)}
+                              className="flex-1 py-2 text-sm font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                            >
+                              {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
+                            </button>
                           )}
                         </div>
                       </div>
@@ -559,7 +637,7 @@ export default function MyTasks() {
                             {task.deadline && (
                               <div className="text-sm">
                                 <span className="text-gray-600">Deadline: </span>
-                                <span className="font-medium text-gray-900">{task.deadline}</span>
+                                <span className="font-medium text-gray-900">{formatDeadline(task.deadline)}</span>
                               </div>
                             )}
                           </div>
@@ -597,7 +675,10 @@ export default function MyTasks() {
   </div>
   
   <div className="flex flex-col gap-2">
-    <button className="flex items-center justify-center w-full gap-2 py-2 text-white transition-all rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+    <button
+      onClick={() => navigate(`/nearby-task-detail/${task.id}`)}
+      className="flex items-center w-full gap-2 py-2 text-white transition-all rounded-lg justify-cent er bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+    >
       <FaEye />
       View Details
     </button>
@@ -625,6 +706,16 @@ export default function MyTasks() {
           Decline
         </button>
       </div>
+    )}
+
+    {task.status === "open" && (
+      <button
+        onClick={() => acceptTask(task.id)}
+        disabled={acceptingTasks.has(task.id)}
+        className="flex items-center justify-center w-full gap-2 py-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+      >
+        {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
+      </button>
     )}
 
     {activeTab !== "all" && (

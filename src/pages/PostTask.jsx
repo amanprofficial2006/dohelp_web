@@ -472,7 +472,7 @@ export default function PostTask() {
 
       if (response.ok && result.success) {
         toast.success("Task posted successfully!");
-        navigate("/my-tasks");
+        navigate("/posted-tasks");
       } else {
         // Handle validation errors
         if (result.errors) {
@@ -1127,11 +1127,14 @@ export default function PostTask() {
                           <div>
                             <h3 className="mb-2 text-lg font-bold text-gray-900">{formData.title}</h3>
                             <div className="flex flex-wrap items-center gap-2 mb-3">
-                              {formData.categories.map((categoryName) => (
-                                <span key={categoryName} className={`px-3 py-1 rounded-full text-sm bg-gradient-to-r ${getCategoryColor(categoryName)} text-white`}>
-                                  {categoryName}
-                                </span>
-                              ))}
+                              {formData.categories.map((categoryId) => {
+                                const category = categories.find(c => c.id === categoryId);
+                                return (
+                                  <span key={categoryId} className={`px-3 py-1 rounded-full text-sm bg-gradient-to-r ${getCategoryColor(categoryId)} text-white`}>
+                                    {category ? category.name : categoryId}
+                                  </span>
+                                );
+                              })}
                               <span className={`px-3 py-1 rounded-full text-sm ${
                                 formData.urgency === "urgent" ? "bg-red-100 text-red-700" :
                                 formData.urgency === "today" ? "bg-orange-100 text-orange-700" :

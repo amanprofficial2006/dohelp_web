@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import { useCategories } from "../contexts/CategoriesContext";
 import {
   FaSearch,
   FaFilter,
@@ -30,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function PostedTasks() {
   const navigate = useNavigate();
+  const { categories, loading: categoriesLoading } = useCategories();
   const [sortBy, setSortBy] = useState("recent");
   const [showFilters, setShowFilters] = useState(false);
   const [tasks, setTasks] = useState([]);
@@ -122,6 +124,8 @@ export default function PostedTasks() {
   };
 
   useEffect(() => {
+    if (categories.length === 0) return; // Wait for categories to load
+
     const token = sessionStorage.getItem('token');
 
     fetch('https://dohelp.newhopeindia17.com/api/post-task', {
@@ -140,7 +144,7 @@ export default function PostedTasks() {
               id: task.id,
               title: task.title,
               description: task.description,
-              category: task.category,
+              category: getCategoryName(task.category),
               amount: `₹${task.amount}`,
               location: task.location,
               created_at: task.created_at,
@@ -162,7 +166,7 @@ export default function PostedTasks() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [categories]);
 
   const statusColors = {
     "open": "bg-green-100 text-green-700",
@@ -189,6 +193,11 @@ export default function PostedTasks() {
       "cancelled": "Cancelled"
     };
     return texts[status] || status;
+  };
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id == categoryId);
+    return category ? category.name : categoryId;
   };
 
   return (

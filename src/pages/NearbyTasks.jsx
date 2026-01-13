@@ -41,6 +41,12 @@ export default function NearbyTasks() {
   const [nearbyTasks, setNearbyTasks] = useState([]);
   const [loadingNearby, setLoadingNearby] = useState(true);
   const [errorNearby, setErrorNearby] = useState(null);
+  const [acceptingTasks, setAcceptingTasks] = useState(new Set());
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : categoryId;
+  };
 
   const formatTimeAgo = (dateString) => {
     const now = new Date();
@@ -62,6 +68,43 @@ export default function NearbyTasks() {
       year: created.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
   };
+
+  const acceptTask = async (taskId) => {
+    setAcceptingTasks(prev => new Set(prev).add(taskId));
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const res = await fetch(`https://dohelp.newhopeindia17.com/api/tasks/accept/${taskId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Task accepted successfully!");
+        // Refresh the tasks list
+        setNearbyTasks(prev => prev.filter(task => task.id !== taskId));
+      } else {
+        alert(data.message || "Failed to accept task");
+      }
+    } catch (error) {
+      alert("Something went wrong");
+    } finally {
+      setAcceptingTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(taskId);
+        return newSet;
+      });
+    }
+  };
+
+
+
+
 
   useEffect(() => {
     const fetchNearbyTasks = async () => {
@@ -320,12 +363,12 @@ export default function NearbyTasks() {
                               </span>
                             )}
                             <span className={`px-2 py-1 text-xs rounded-full ${
-                              task.category === "Delivery" ? "bg-blue-100 text-blue-700" :
-                              task.category === "Cleaning" ? "bg-green-100 text-green-700" :
-                              task.category === "Online Help" ? "bg-purple-100 text-purple-700" :
+                              getCategoryName(task.category) === "Delivery" ? "bg-blue-100 text-blue-700" :
+                              getCategoryName(task.category) === "Cleaning" ? "bg-green-100 text-green-700" :
+                              getCategoryName(task.category) === "Online Help" ? "bg-purple-100 text-purple-700" :
                               "bg-yellow-100 text-yellow-700"
                             }`}>
-                              {task.category}
+                              {getCategoryName(task.category)}
                             </span>
                           </div>
 
@@ -345,9 +388,22 @@ export default function NearbyTasks() {
 
                         <div className="flex flex-col items-end gap-3">
                           <div className="text-2xl font-bold text-green-600">{task.amount}</div>
-                          <button className="px-6 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
-                            View Details
-                          </button>
+                          <div className="flex gap-2">
+                            <Link
+                              to={`/nearby-task-detail/${task.id}`}
+                              className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                              style={{ color: 'white' }}
+                            >
+                              View
+                            </Link>
+                            <button
+                              onClick={() => acceptTask(task.id)}
+                              disabled={acceptingTasks.has(task.id)}
+                              className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
+                            >
+                              {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </motion.div>

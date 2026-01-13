@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import PostTask from "./pages/PostTask";
 import NearbyTasks from "./pages/NearbyTasks";
+import NearbyTaskDetail from "./pages/NearbyTaskDetail";
 import TaskDetail from "./pages/TaskDetail";
 import MyTasks from "./pages/MyTasks";
 import PostedTasks from "./pages/PostedTasks";
@@ -58,6 +59,7 @@ function App() {
             <Route path="/" element={<RootRedirect />} />
             <Route path="/post-task" element={<PostTask />} />
             <Route path="/tasks" element={<NearbyTasks />} />
+            <Route path="/nearby-task-detail/:id" element={<NearbyTaskDetail />} />
             <Route path="/task-detail/:id" element={<TaskDetail />} />
             <Route path="/my-tasks" element={<MyTasks />} />
             <Route path="/posted-tasks" element={<PostedTasks />} />

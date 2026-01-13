@@ -19,7 +19,6 @@ import {
   FaLock,
   FaGlobe,
   FaEdit,
-  FaTrash,
   FaShareAlt,
   FaBookmark,
   FaRupeeSign,
@@ -31,15 +30,14 @@ import {
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-export default function TaskDetail() {
+export default function NearbyTaskDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { categories } = useCategories();
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -86,12 +84,12 @@ export default function TaskDetail() {
     }
   };
 
-  const deleteTask = async () => {
-    setIsDeleting(true);
+  const acceptTask = async () => {
+    setIsAccepting(true);
     const token = sessionStorage.getItem("token");
 
     try {
-      const res = await fetch(`https://dohelp.newhopeindia17.com/api/tasks/delete/${id}`, {
+      const res = await fetch(`https://dohelp.newhopeindia17.com/api/tasks/accept/${id}`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -102,17 +100,17 @@ export default function TaskDetail() {
       const data = await res.json();
 
       if (data.success) {
-        setShowDeleteModal(false);
+        alert("Task accepted successfully!");
         setTimeout(() => {
-          navigate("/posted-tasks");
+          navigate("/nearby-tasks");
         }, 1000);
       } else {
-        alert(data.message || "Failed to delete task");
-        setIsDeleting(false);
+        alert(data.message || "Failed to accept task");
+        setIsAccepting(false);
       }
     } catch (error) {
       alert("Something went wrong");
-      setIsDeleting(false);
+      setIsAccepting(false);
     }
   };
 
@@ -183,9 +181,11 @@ export default function TaskDetail() {
   };
 
   const getCategoryName = (categoryId) => {
-    const category = categories.find(cat => cat.id == categoryId);
+    const category = categories.find(cat => cat.id === parseInt(categoryId));
     return category ? category.name : categoryId;
   };
+
+
 
   if (loading) {
     return (
@@ -213,17 +213,14 @@ export default function TaskDetail() {
           </div>
           <h2 className="mb-3 text-2xl font-bold text-gray-900">Task Not Found</h2>
           <p className="mb-6 text-gray-600">{error || "The task you're looking for doesn't exist or has been removed."}</p>
-<Link
-  to="/posted-tasks"
-  className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-black/40 backdrop-blur-md rounded-xl hover:bg-black/60"
->
-  <FaArrowLeft />
-  Back to My Tasks
-</Link>
-
-
-   
-     </div>
+          <Link
+            to="/tasks"
+            className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-black/40 backdrop-blur-md rounded-xl hover:bg-black/60"
+          >
+            <FaArrowLeft />
+            Back to Nearby Tasks
+          </Link>
+        </div>
       </div>
     );
   }
@@ -233,41 +230,6 @@ export default function TaskDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md p-6 bg-white shadow-2xl rounded-2xl"
-          >
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
-              <FaTrash className="text-2xl text-red-500" />
-            </div>
-            <h3 className="mb-2 text-xl font-bold text-center text-gray-900">Delete Task</h3>
-            <p className="mb-6 text-center text-gray-600">
-              Are you sure you want to delete this task? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-4 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={deleteTask}
-                className="flex-1 px-4 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:opacity-50"
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Deleting..." : "Delete Task"}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
       <div className="relative">
         {/* Header Background */}
         <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500"></div>
@@ -276,11 +238,11 @@ export default function TaskDetail() {
           {/* Back Button */}
           <div className="mb-8">
             <Link
-              to="/posted-tasks"
+              to="/tasks"
               className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 hover:shadow-lg"
             >
               <FaArrowLeft />
-              Back to My Tasks
+              Back to Nearby Tasks
             </Link>
           </div>
 
@@ -308,14 +270,18 @@ export default function TaskDetail() {
                         {urgency.icon}
                         {urgency.text}
                       </span>
-                      <span className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-full">
-                        <FaMoneyBillWave />
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        getCategoryName(task.category) === "Delivery" ? "bg-blue-100 text-blue-700" :
+                        getCategoryName(task.category) === "Cleaning" ? "bg-green-100 text-green-700" :
+                        getCategoryName(task.category) === "Online Help" ? "bg-purple-100 text-purple-700" :
+                        "bg-yellow-100 text-yellow-700"
+                      }`}>
                         {getCategoryName(task.category)}
                       </span>
                     </div>
-                    
+
                     <h1 className="mb-4 text-4xl font-bold text-gray-900 lg:text-5xl">{task.title}</h1>
-                    
+
                     <div className="flex flex-wrap items-center gap-4 text-gray-600">
                       <span className="flex items-center gap-2">
                         <FaClock className="text-blue-500" />
@@ -371,7 +337,6 @@ export default function TaskDetail() {
                         </div>
                       </div>
                       <div>
-                        
                         <div className="text-sm font-medium text-gray-500">Duration</div>
                         <div className="flex items-center gap-3 mt-1">
                           <FaClock className="text-gray-400" />
@@ -570,25 +535,13 @@ export default function TaskDetail() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                 
-                  
-                  {task.status === 'open' && (
-                    <Link
-                      to="/post-task"
-                      state={{ task: task, isEdit: true }}
-                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                      <FaEdit />
-                      Edit Task
-                    </Link>
-                  )}
-                  
                   <button
-                    onClick={() => setShowDeleteModal(true)}
-                    className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5"
+                    onClick={acceptTask}
+                    disabled={isAccepting}
+                    className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:from-green-600 hover:to-emerald-700 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    <FaTrash />
-                    Delete Task
+                    <FaCheckCircle />
+                    {isAccepting ? "Accepting..." : "Accept Task"}
                   </button>
                 </div>
               </div>
