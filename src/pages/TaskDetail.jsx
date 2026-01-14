@@ -26,7 +26,9 @@ import {
   FaInfoCircle,
   FaStar,
   FaCrown,
-  FaCalendarCheck
+  FaCalendarCheck,
+  FaVideo,
+  FaComment
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -120,20 +122,17 @@ export default function TaskDetail() {
     const now = new Date();
     const created = new Date(createdAt);
     const diffMs = now - created;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) {
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      if (diffHours === 0) {
-        const diffMinutes = Math.floor(diffMs / (1000 * 60));
-        return diffMinutes === 0 ? 'Just now' : `${diffMinutes} minutes ago`;
-      } else {
-        return `${diffHours} hours ago`;
-      }
+
+    if (diffMinutes < 60) {
+      return diffMinutes === 0 ? 'Just now' : `${diffMinutes} minutes ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hours ago`;
+    } else {
+      return `${diffDays} days ago`;
     }
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
   };
 
   const statusConfig = {
@@ -143,8 +142,8 @@ export default function TaskDetail() {
       icon: <FaCheckCircle className="text-green-500" />,
       badge: "bg-gradient-to-r from-green-400 to-emerald-500"
     },
-    "assigned": {
-      text: "Assigned",
+    "accepted": {
+      text: "Accepted",
       color: "bg-orange-50 text-orange-700 border-orange-200",
       icon: <FaUser className="text-orange-500" />,
       badge: "bg-gradient-to-r from-orange-400 to-amber-500"
@@ -353,6 +352,68 @@ export default function TaskDetail() {
                 <p className="text-lg leading-relaxed text-gray-700">{task.description}</p>
               </div>
 
+              {/* Progress Section */}
+              <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <h3 className="flex items-center gap-3 mb-6 text-xl font-semibold text-gray-900">
+                  <FaClock className="text-blue-500" />
+                  Task Progress
+                </h3>
+                <div className="relative">
+                  {(() => {
+                    const statusOrder = { 'open': 0, 'accepted': 1, 'in-progress': 2, 'completed': 3 };
+                    const currentStep = statusOrder[task.status] || 0;
+
+                    return (
+                      <>
+                        {/* Progress Bar Background */}
+                        <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+                          <div
+                            className="h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                            style={{
+                              width: `${(currentStep + 1) * 25}%`
+                            }}
+                          ></div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          {[
+                            { key: 'open', label: 'Posted', icon: <FaCheckCircle className="text-xs" /> },
+                            { key: 'accepted', label: 'Accepted', icon: <FaCheckCircle className="text-xs" /> },
+                            { key: 'in-progress', label: 'In Progress', icon: <FaClock className="text-xs" /> },
+                            { key: 'completed', label: 'Completed', icon: <FaCalendarCheck className="text-xs" /> }
+                          ].map((step, index) => {
+                            const isActive = currentStep >= index;
+                            const isCompleted = currentStep > index;
+
+                            return (
+                              <div key={step.key} className="flex flex-col items-center flex-1">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 border-4 ${
+                                  isCompleted ? 'bg-green-500 text-white border-green-500 shadow-lg' :
+                                  isActive ? 'bg-blue-500 text-white border-blue-500 shadow-lg' :
+                                  'bg-white text-gray-500 border-gray-300'
+                                }`}>
+                                  {step.icon}
+                                </div>
+                                <span className={`text-xs font-medium text-center ${
+                                  isActive ? 'text-blue-600' : 'text-gray-500'
+                                }`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="mt-6 text-center">
+                          <span className="text-sm text-gray-600">
+                            Current Status: <span className="font-semibold text-blue-600">{status.text}</span>
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
               {/* Details Grid */}
               <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
                 {/* Left Column */}
@@ -371,12 +432,12 @@ export default function TaskDetail() {
                         </div>
                       </div>
                       <div>
-                        
+
                         <div className="text-sm font-medium text-gray-500">Duration</div>
                         <div className="flex items-center gap-3 mt-1">
                           <FaClock className="text-gray-400" />
                           <span className="text-lg font-medium text-gray-900">
-                            {task.duration ? `${task.duration} minutes` : 'Not specified'}
+                            {task.duration ? (Number(task.duration) < 60 ? `${task.duration} minutes` : `${Math.round(Number(task.duration) / 60)} hours`) : 'Not specified'}
                           </span>
                         </div>
                       </div>
@@ -421,19 +482,38 @@ export default function TaskDetail() {
                       <FaCrown className="text-amber-500" />
                       Helper Information
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-amber-100">
                           <FaUser className="text-amber-600" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">
-                            {task.assigned_helper?.name || 'Not assigned yet'}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {task.assigned_helper ? 'Assigned Helper' : 'Looking for helper'}
-                          </div>
+                          <div className="font-medium text-gray-900">{task.helper?.name || 'Aman singh'}</div>
+                          <div className="text-sm text-gray-500">Helper ID: {task.helper?.user_uid || 'USR-OGB6QVEC'}</div>
                         </div>
+                      </div>
+                      <div className="flex gap-3 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={() => alert('Voice call feature coming soon!')}
+                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 hover:shadow-lg"
+                        >
+                          <FaPhone className="text-sm" />
+                          Voice Call
+                        </button>
+                        <button
+                          onClick={() => alert('Video call feature coming soon!')}
+                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+                        >
+                          <FaVideo className="text-sm" />
+                          Video Call
+                        </button>
+                        <button
+                          onClick={() => alert('Chat feature coming soon!')}
+                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
+                        >
+                          <FaComment className="text-sm" />
+                          Chat
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -583,13 +663,15 @@ export default function TaskDetail() {
                     </Link>
                   )}
                   
-                  <button
-                    onClick={() => setShowDeleteModal(true)}
-                    className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5"
-                  >
-                    <FaTrash />
-                    Delete Task
-                  </button>
+                  {task.status === 'open' && (
+                    <button
+                      onClick={() => setShowDeleteModal(true)}
+                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                      <FaTrash />
+                      Delete Task
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

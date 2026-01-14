@@ -32,12 +32,16 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function PostedTasks() {
   const navigate = useNavigate();
   const { categories, loading: categoriesLoading } = useCategories();
-  const [sortBy, setSortBy] = useState("recent");
+  const [sortBy, setSortBy] = useState("amount");
   const [showFilters, setShowFilters] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedStatuses, setSelectedStatuses] = useState(["Open", "In Progress", "Completed", "Cancelled"]);
+  const [minAmount, setMinAmount] = useState("0");
+  const [maxAmount, setMaxAmount] = useState("10000");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getPostedTime = (createdAt) => {
     const now = new Date();
@@ -121,7 +125,7 @@ export default function PostedTasks() {
       console.log('Error parsing date:', error);
       return 'Invalid Date';
     }
-  };
+   };
 
   useEffect(() => {
     if (categories.length === 0) return; // Wait for categories to load
@@ -150,9 +154,10 @@ export default function PostedTasks() {
               created_at: task.created_at,
               postedTime: getPostedTime(task.created_at),
               deadline: new Date(task.deadline).toLocaleDateString(),
-              status: task.status,
+              status: task.status.toLowerCase(),
               offers: 0,
-              acceptedBy: null,
+              acceptedBy: task.accepted_by || null,
+              helperName: task.helper?.name || null,
               urgent: task.urgency_level === 'urgent'
             };
           });
@@ -170,7 +175,7 @@ export default function PostedTasks() {
 
   const statusColors = {
     "open": "bg-green-100 text-green-700",
-    "assigned": "bg-orange-100 text-orange-700",
+    "accepted": "bg-blue-100 text-blue-700",
     "in-progress": "bg-blue-100 text-blue-700",
     "completed": "bg-emerald-100 text-emerald-700",
     "cancelled": "bg-red-100 text-red-700"
@@ -178,7 +183,7 @@ export default function PostedTasks() {
 
   const statusIcons = {
     "open": <FaCheckCircle className="text-green-500" />,
-    "assigned": <FaClock className="text-blue-500" />,
+    "accepted": <FaCheckCircle className="text-blue-500" />,
     "in-progress": <FaClock className="text-blue-500" />,
     "completed": <FaCheckCircle className="text-emerald-500" />,
     "cancelled": <FaTimesCircle className="text-red-500" />
@@ -187,7 +192,7 @@ export default function PostedTasks() {
   const getStatusText = (status) => {
     const texts = {
       "open": "Open",
-      "assigned": "Assigned",
+      "accepted": "Accepted",
       "in-progress": "In Progress",
       "completed": "Completed",
       "cancelled": "Cancelled"
@@ -252,12 +257,12 @@ export default function PostedTasks() {
 
             <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-gray-900">{tasks.filter(t => t.status === 'assigned').length}</span>
-                <span className="px-2 py-1 text-xs text-orange-600 bg-orange-100 rounded-full">
-                  Assigned
+                <span className="text-lg font-bold text-gray-900">{tasks.filter(t => t.status === 'accepted').length}</span>
+                <span className="px-2 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">
+                  Accepted
                 </span>
               </div>
-              <div className="text-sm text-gray-600">In Progress</div>
+              <div className="text-sm text-gray-600">Accepted Tasks</div>
             </div>
 
             <div className="p-4 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
@@ -294,7 +299,9 @@ export default function PostedTasks() {
                       </div>
                       <input
                         type="text"
-                        placeholder="Search tasks..."
+                        placeholder="Search tasks by name, helper, address, category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full py-2 pl-10 pr-4 transition-colors bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -303,17 +310,6 @@ export default function PostedTasks() {
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Sort By</label>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => setSortBy("recent")}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          sortBy === "recent"
-                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        <FaSortAmountDown className="inline mr-2" />
-                        Recent
-                      </button>
                       <button
                         onClick={() => setSortBy("amount")}
                         className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -325,47 +321,56 @@ export default function PostedTasks() {
                         <FaSortAmountUp className="inline mr-2" />
                         Amount
                       </button>
+                      <button
+                        onClick={() => {
+                          setMinAmount("");
+                          setMaxAmount("");
+                        }}
+                        className="px-3 py-2 text-sm font-medium text-gray-600 transition-colors border border-gray-300 rounded-lg hover:bg-gray-50"
+                      >
+                        Clear
+                      </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-gray-700">Status</label>
-                    <div className="space-y-2">
-                      {["Open", "Assigned", "In Progress", "Completed", "Cancelled"].map((status) => (
-                        <label key={status} className="flex items-center">
-                          <input type="checkbox" className="text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                          <span className="ml-2 text-sm text-gray-700">{status}</span>
-                        </label>
-                      ))}
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Amount Range</label>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Min ₹"
+                          value={minAmount}
+                          onChange={(e) => setMinAmount(e.target.value)}
+                          className="w-24 py-2 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max ₹"
+                          value={maxAmount}
+                          onChange={(e) => setMaxAmount(e.target.value)}
+                          className="w-24 py-2 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="50000"
+                        step="500"
+                        value={maxAmount}
+                        onChange={(e) => setMaxAmount(e.target.value)}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>₹0</span>
+                        <span>₹50,000</span>
+                      </div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center justify-center w-full gap-2 py-2 text-blue-600 transition-colors border border-blue-500 rounded-lg hover:bg-blue-50"
-                  >
-                    <FaFilter />
-                    {showFilters ? "Hide Advanced Filters" : "Show Advanced Filters"}
-                  </button>
-                </div>
-              </div>
 
-              {/* Quick Actions */}
-              <div className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl backdrop-blur-sm">
-                <h2 className="mb-4 text-lg font-bold text-gray-900">Quick Actions</h2>
-                <div className="space-y-3">
-                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50">
-                    <span className="font-medium">View All Offers</span>
-                    <span className="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full">5 new</span>
-                  </button>
-                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50">
-                    <span className="font-medium">Pending Payments</span>
-                    <span className="px-2 py-1 text-xs text-orange-700 bg-orange-100 rounded-full">₹2,500</span>
-                  </button>
-                  <button className="flex items-center justify-between w-full p-3 text-gray-900 transition-colors border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50">
-                    <span className="font-medium">Awaiting Reviews</span>
-                    <span className="px-2 py-1 text-xs text-purple-700 bg-purple-100 rounded-full">3 tasks</span>
-                  </button>
+
+                
                 </div>
               </div>
             </motion.div>
@@ -389,43 +394,47 @@ export default function PostedTasks() {
 
                 {/* Category Tabs */}
                 <div className="flex flex-wrap gap-2">
-                  {["all", "open", "assigned", "in-progress", "completed"].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        activeTab === tab
-                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {tab === "all" && "All Tasks"}
-                      {tab === "open" && (
-                        <span className="flex items-center gap-1">
-                          <FaCheckCircle className="text-green-500" />
-                          Open
-                        </span>
-                      )}
-                      {tab === "assigned" && (
-                        <span className="flex items-center gap-1">
-                          <FaClock className="text-blue-500" />
-                          Assigned
-                        </span>
-                      )}
-                      {tab === "in-progress" && (
-                        <span className="flex items-center gap-1">
-                          <FaClock className="text-blue-500" />
-                          In Progress
-                        </span>
-                      )}
-                      {tab === "completed" && (
-                        <span className="flex items-center gap-1">
-                          <FaCheckCircle className="text-emerald-500" />
-                          Completed
-                        </span>
-                      )}
-                    </button>
-                  ))}
+                  {["all", "accepted", "in-progress", "completed"].map((tab) => {
+                    // Calculate count for each tab
+                    let count = 0;
+                    if (tab === "all") {
+                      count = tasks.length;
+                    } else {
+                      count = tasks.filter(task => task.status.toLowerCase() === tab).length;
+                    }
+
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          activeTab === tab
+                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {tab === "all" && `All Tasks (${count})`}
+                        {tab === "accepted" && (
+                          <span className="flex items-center gap-1">
+                            <FaCheckCircle className="text-blue-500" />
+                            Accepted ({count})
+                          </span>
+                        )}
+                        {tab === "in-progress" && (
+                          <span className="flex items-center gap-1">
+                            <FaClock className="text-blue-500" />
+                            In Progress ({count})
+                          </span>
+                        )}
+                        {tab === "completed" && (
+                          <span className="flex items-center gap-1">
+                            <FaCheckCircle className="text-emerald-500" />
+                            Completed ({count})
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               {/* Loading State */}
@@ -459,11 +468,33 @@ export default function PostedTasks() {
               {!loading && !error && (
                 <div className="divide-y divide-gray-100">
                   {(() => {
-                    const filteredTasks = activeTab === "all"
-                      ? tasks
-                      : tasks.filter(task => task.status === activeTab);
+                    // First filter by search query if specified
+                    let filteredTasks = tasks;
+                    if (searchQuery) {
+                      filteredTasks = filteredTasks.filter(task =>
+                        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (task.helperName && task.helperName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                        task.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        task.category.toLowerCase().includes(searchQuery.toLowerCase())
+                      );
+                    }
 
-                    return filteredTasks.length === 0 ? (
+                    // Then filter by amount range if specified
+                    if (minAmount || maxAmount) {
+                      filteredTasks = filteredTasks.filter(task => {
+                        const taskAmount = parseInt(task.amount.replace('₹', ''));
+                        const min = minAmount ? parseInt(minAmount) : 0;
+                        const max = maxAmount ? parseInt(maxAmount) : Infinity;
+                        return taskAmount >= min && taskAmount <= max;
+                      });
+                    }
+
+                    // Then filter by active tab
+                    const tabFilteredTasks = activeTab === "all"
+                      ? filteredTasks
+                      : filteredTasks.filter(task => task.status.toLowerCase() === activeTab);
+
+                    return tabFilteredTasks.length === 0 ? (
                       <div className="p-8 text-center">
                         <FaPlusCircle className="mx-auto mb-4 text-4xl text-gray-400" />
                         <p className="mb-4 text-gray-600">
@@ -525,6 +556,14 @@ export default function PostedTasks() {
                               </span>
                             </div>
 
+                            {/* Fifth row: Helper Name */}
+                            <div className="text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <FaUser />
+                                Helper: {task.helperName || "Not Assigned"}
+                              </span>
+                            </div>
+
                             {/* Bottom row: Actions on left, status and urgency on right */}
                             <div className="flex items-center justify-between">
                               <div className="flex flex-wrap items-center gap-2">
@@ -535,15 +574,23 @@ export default function PostedTasks() {
                                   <FaEye />
                                   View Details
                                 </Link>
-<button
-  onClick={() => deleteTask(task.id)}
-  className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50"
->
-  <FaTrash />
-  Delete
-</button>
-
-
+                                {task.status === 'open' ? (
+                                  <button
+                                    onClick={() => deleteTask(task.id)}
+                                    className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50"
+                                  >
+                                    <FaTrash />
+                                    Delete
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => alert('Contact Helper feature coming soon!')}
+                                    className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50"
+                                  >
+                                    <FaPhone />
+                                    Contact Helper
+                                  </button>
+                                )}
                               </div>
                               <div className="flex items-center gap-2">
                                 {task.urgent && (
