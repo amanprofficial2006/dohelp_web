@@ -140,31 +140,31 @@ export default function TaskDetail() {
       text: "Pending",
       color: "bg-green-50 text-green-700 border-green-200",
       icon: <FaCheckCircle className="text-green-500" />,
-      badge: "bg-gradient-to-r from-green-400 to-emerald-500"
+      badge: "bg-linear-to-r from-green-400 to-emerald-500"
     },
     "accepted": {
       text: "Accepted",
       color: "bg-orange-50 text-orange-700 border-orange-200",
       icon: <FaUser className="text-orange-500" />,
-      badge: "bg-gradient-to-r from-orange-400 to-amber-500"
+      badge: "bg-linear-to-r from-orange-400 to-amber-500"
     },
     "in-progress": {
       text: "In Progress",
       color: "bg-blue-50 text-blue-700 border-blue-200",
       icon: <FaClock className="text-blue-500" />,
-      badge: "bg-gradient-to-r from-blue-400 to-cyan-500"
+      badge: "bg-linear-to-r from-blue-400 to-cyan-500"
     },
     "completed": {
       text: "Completed",
       color: "bg-emerald-50 text-emerald-700 border-emerald-200",
       icon: <FaCalendarCheck className="text-emerald-500" />,
-      badge: "bg-gradient-to-r from-emerald-400 to-teal-500"
+      badge: "bg-linear-to-r from-emerald-400 to-teal-500"
     },
     "cancelled": {
       text: "Cancelled",
       color: "bg-red-50 text-red-700 border-red-200",
       icon: <FaTimesCircle className="text-red-500" />,
-      badge: "bg-gradient-to-r from-red-400 to-pink-500"
+      badge: "bg-linear-to-r from-red-400 to-pink-500"
     }
   };
 
@@ -172,7 +172,7 @@ export default function TaskDetail() {
     "urgent": {
       text: "Urgent",
       icon: <FaExclamationCircle className="animate-pulse" />,
-      color: "bg-gradient-to-r from-red-500 to-pink-600 text-white"
+      color: "bg-linear-to-r from-red-500 to-pink-600 text-white"
     },
     "normal": {
       text: "Normal",
@@ -188,7 +188,7 @@ export default function TaskDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
@@ -204,10 +204,10 @@ export default function TaskDetail() {
 
   if (error || !task) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
         <div className="max-w-md p-8 text-center">
           <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-400 to-pink-500 opacity-20 blur-xl"></div>
+            <div className="absolute inset-0 rounded-full bg-linear-to-r from-red-400 to-pink-500 opacity-20 blur-xl"></div>
             <FaTimesCircle className="relative text-6xl text-red-500" />
           </div>
           <h2 className="mb-3 text-2xl font-bold text-gray-900">Task Not Found</h2>
@@ -228,7 +228,7 @@ export default function TaskDetail() {
   const urgency = urgencyConfig[task.urgency_level] || urgencyConfig.normal;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
@@ -254,7 +254,7 @@ export default function TaskDetail() {
               </button>
               <button
                 onClick={deleteTask}
-                className="flex-1 px-4 py-3 font-medium text-white transition-colors rounded-lg bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:opacity-50"
+                className="flex-1 px-4 py-3 font-medium text-white transition-colors rounded-lg bg-linear-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 disabled:opacity-50"
                 disabled={isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Delete Task"}
@@ -266,7 +266,7 @@ export default function TaskDetail() {
 
       <div className="relative">
         {/* Header Background */}
-        <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500" />
+        <div className="absolute inset-x-0 top-0 h-64 bg-linear-to-r from-blue-500 via-blue-600 to-cyan-500" />
 
         <div className="relative max-w-6xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
           {/* Back Button */}
@@ -325,7 +325,7 @@ export default function TaskDetail() {
                   </div>
 
                   {/* Price Card */}
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 min-w-[200px]">
+                  <div className="p-6 border border-blue-100 bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl min-w-50">
                     <div className="mb-2 text-sm font-medium text-blue-700">Budget</div>
                     <div className="flex items-baseline gap-2">
                       <FaRupeeSign className="text-2xl text-blue-600" />
@@ -339,7 +339,7 @@ export default function TaskDetail() {
               </div>
 
               {/* Description Card */}
-              <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-gray-50 to-white rounded-2xl">
+              <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-gray-50 to-white rounded-2xl">
                 <h2 className="flex items-center gap-3 mb-4 text-2xl font-bold text-gray-900">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <FaInfoCircle className="text-blue-600" />
@@ -350,7 +350,7 @@ export default function TaskDetail() {
               </div>
 
               {/* Progress Section */}
-              <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+              <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                 <h3 className="flex items-center gap-3 mb-6 text-xl font-semibold text-gray-900">
                   <FaClock className="text-blue-500" />
                   Task Progress
@@ -365,7 +365,7 @@ export default function TaskDetail() {
                         {/* Progress Bar Background */}
                         <div className="w-full h-2 mb-6 bg-gray-200 rounded-full">
                           <div
-                            className="h-2 transition-all duration-500 ease-out rounded-full bg-gradient-to-r from-blue-500 to-green-500"
+                            className="h-2 transition-all duration-500 ease-out rounded-full bg-linear-to-r from-blue-500 to-green-500"
                             style={{
                               width: `${(currentStep + 1) * 25}%`
                             }}
@@ -414,7 +414,7 @@ export default function TaskDetail() {
               {/* Main Details Grid */}
               <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
                 {/* Timeline Details */}
-                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaCalendarAlt className="text-blue-500" />
                     Timeline Details
@@ -446,7 +446,7 @@ export default function TaskDetail() {
                 </div>
 
                 {/* Helper Information */}
-                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaCrown className="text-amber-500" />
                     Helper Information
@@ -469,13 +469,13 @@ export default function TaskDetail() {
                             <>
                               <button
                                 onClick={() => alert("Voice call feature coming soon!")}
-                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg"
+                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-linear-to-r from-green-500 to-green-600 hover:shadow-lg"
                               >
                                 <FaPhone className="text-sm" /> Voice Call
                               </button>
                               <button
                                 onClick={() => alert("Video call feature coming soon!")}
-                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:shadow-lg"
+                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-linear-to-r from-blue-500 to-blue-600 hover:shadow-lg"
                               >
                                 <FaVideo className="text-sm" /> Video Call
                               </button>
@@ -483,7 +483,7 @@ export default function TaskDetail() {
                           )}
                           <button
                             onClick={() => alert("Chat feature coming soon!")}
-                            className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:shadow-lg"
+                            className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-linear-to-r from-purple-500 to-purple-600 hover:shadow-lg"
                           >
                             <FaComment className="text-sm" /> Chat
                           </button>
@@ -500,7 +500,7 @@ export default function TaskDetail() {
                 </div>
 
                 {/* Location Details */}
-                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaMapMarkerAlt className="text-red-500" />
                     Location Details
@@ -517,7 +517,7 @@ export default function TaskDetail() {
                 </div>
 
                 {/* Task Settings */}
-                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaShieldAlt className="text-purple-500" />
                     Task Settings
@@ -561,7 +561,7 @@ export default function TaskDetail() {
 
               {/* Required Skills */}
               {task.skills?.length > 0 && (
-                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaTag className="text-purple-500" /> Required Skills
                   </h3>
@@ -569,7 +569,7 @@ export default function TaskDetail() {
                     {task.skills.map((skillObj, index) => (
                       <span
                         key={index}
-                        className="flex items-center gap-2 px-4 py-2 font-medium text-purple-700 border border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl hover:shadow-md"
+                        className="flex items-center gap-2 px-4 py-2 font-medium text-purple-700 border border-purple-200 bg-linear-to-r from-purple-50 to-violet-50 rounded-xl hover:shadow-md"
                       >
                         <FaTag className="text-purple-500" /> {skillObj.skill}
                       </span>
@@ -580,7 +580,7 @@ export default function TaskDetail() {
 
               {/* Additional Info */}
               {task.additional_info && (
-                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaInfoCircle className="text-cyan-500" />
                     Additional Information
@@ -591,7 +591,7 @@ export default function TaskDetail() {
 
               {/* Images Gallery */}
               {task.images && task.images.length > 0 && (
-                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaImage className="text-amber-500" />
                     Task Images
@@ -636,7 +636,7 @@ export default function TaskDetail() {
                     <Link
                       to="/post-task"
                       state={{ task: task, isEdit: true }}
-                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:shadow-lg"
+                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-linear-to-r from-blue-500 to-blue-600 rounded-xl hover:shadow-lg"
                     >
                       <FaEdit />
                       Edit Task
@@ -645,7 +645,7 @@ export default function TaskDetail() {
                   {task.status === "open" && (
                     <button
                       onClick={() => setShowDeleteModal(true)}
-                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:shadow-lg"
+                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-linear-to-r from-red-500 to-pink-600 rounded-xl hover:shadow-lg"
                     >
                       <FaTrash />
                       Delete Task

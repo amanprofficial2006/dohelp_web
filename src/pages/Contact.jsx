@@ -137,19 +137,19 @@ export default function ContactUs() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 bg-linear-to-b from-gray-50 to-blue-50 md:p-6">
+      <div className="mx-auto max-w-7xl">
         
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="mb-12 text-center"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="mb-4 text-4xl font-bold text-gray-900 md:text-5xl">
             Get in <span className="text-blue-600">Touch</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="max-w-3xl mx-auto text-xl text-gray-600">
             We're here to help! Contact us for any questions, feedback, or support you need.
           </p>
         </motion.div>
@@ -159,43 +159,43 @@ export default function ContactUs() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          className="grid grid-cols-1 gap-6 mb-12 md:grid-cols-2 lg:grid-cols-4"
         >
           {contactInfo.map((info, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow"
+              className="p-6 transition-shadow bg-white border border-gray-200 shadow-lg rounded-2xl hover:shadow-xl"
             >
-              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${info.color} flex items-center justify-center text-white mb-4`}>
+              <div className={`w-14 h-14 rounded-xl bg-linear-to-br ${info.color} flex items-center justify-center text-white mb-4`}>
                 {info.icon}
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{info.title}</h3>
-              <div className="space-y-2 mb-4">
+              <h3 className="mb-3 text-xl font-bold text-gray-900">{info.title}</h3>
+              <div className="mb-4 space-y-2">
                 {info.details.map((detail, idx) => (
                   <div key={idx} className="text-gray-700">{detail}</div>
                 ))}
               </div>
-              <div className="text-sm text-gray-500 mb-4">{info.description}</div>
-              <button className={`w-full py-2 rounded-lg bg-gradient-to-r ${info.color} text-white hover:opacity-90 transition-opacity`}>
+              <div className="mb-4 text-sm text-gray-500">{info.description}</div>
+              <button className={`w-full py-2 rounded-lg bg-linear-to-r ${info.color} text-white hover:opacity-90 transition-opacity`}>
                 {info.action}
               </button>
             </div>
           ))}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Column - Contact Form */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
+              className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
-                    <FaPaperPlane className="text-white text-2xl" />
+                  <div className="p-3 bg-linear-to-r from-blue-500 to-purple-500 rounded-xl">
+                    <FaPaperPlane className="text-2xl text-white" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">Send us a Message</h2>
@@ -207,27 +207,27 @@ export default function ContactUs() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-12"
+                    className="py-12 text-center"
                   >
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white text-3xl mx-auto mb-6">
+                    <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 text-3xl text-white rounded-full bg-linear-to-r from-green-500 to-emerald-500">
                       <FaCheckCircle />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Message Sent!</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="mb-3 text-2xl font-bold text-gray-900">Message Sent!</h3>
+                    <p className="mb-6 text-gray-600">
                       Thank you for contacting us. Our team will get back to you soon.
                     </p>
                     <button
                       onClick={() => setSubmitted(false)}
-                      className="px-6 py-3 rounded-xl border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="px-6 py-3 text-blue-600 transition-colors border border-blue-500 rounded-xl hover:bg-blue-50"
                     >
                       Send Another Message
                     </button>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block mb-2 text-sm font-medium text-gray-700">
                           <span className="flex items-center gap-2">
                             <FaUser />
                             Your Name
@@ -239,13 +239,13 @@ export default function ContactUs() {
                           value={formData.name}
                           onChange={handleInputChange}
                           placeholder="Enter your name"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block mb-2 text-sm font-medium text-gray-700">
                           <span className="flex items-center gap-2">
                             <FaEnvelope />
                             Email Address
@@ -257,13 +257,13 @@ export default function ContactUs() {
                           value={formData.email}
                           onChange={handleInputChange}
                           placeholder="your@email.com"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block mb-2 text-sm font-medium text-gray-700">
                           <span className="flex items-center gap-2">
                             <FaPhone />
                             Phone Number
@@ -275,19 +275,19 @@ export default function ContactUs() {
                           value={formData.phone}
                           onChange={handleInputChange}
                           placeholder="+91 9876543210"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block mb-2 text-sm font-medium text-gray-700">
                           Inquiry Category
                         </label>
                         <select
                           name="category"
                           value={formData.category}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="general">General Inquiry</option>
                           <option value="support">Technical Support</option>
@@ -300,7 +300,7 @@ export default function ContactUs() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
                         Subject
                       </label>
                       <input
@@ -309,13 +309,13 @@ export default function ContactUs() {
                         value={formData.subject}
                         onChange={handleInputChange}
                         placeholder="What is this regarding?"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
                         Your Message
                       </label>
                       <textarea
@@ -324,7 +324,7 @@ export default function ContactUs() {
                         onChange={handleInputChange}
                         rows="6"
                         placeholder="Please describe your inquiry in detail..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -335,7 +335,7 @@ export default function ContactUs() {
                       </div>
                       <button
                         type="submit"
-                        className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+                        className="flex items-center gap-2 px-8 py-3 text-white transition-all shadow-lg rounded-xl bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
                       >
                         <FaPaperPlane />
                         Send Message
@@ -353,12 +353,12 @@ export default function ContactUs() {
               transition={{ delay: 0.3 }}
               className="mt-8"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Offices</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <h2 className="mb-6 text-2xl font-bold text-gray-900">Our Offices</h2>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 {officeLocations.map((office, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+                    className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
                   >
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-2 bg-blue-100 rounded-lg">
@@ -369,7 +369,7 @@ export default function ContactUs() {
                     
                     <div className="space-y-3">
                       <div className="flex items-start gap-2">
-                        <FaMapMarkerAlt className="text-gray-400 mt-1" />
+                        <FaMapMarkerAlt className="mt-1 text-gray-400" />
                         <span className="text-gray-700">{office.address}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export default function ContactUs() {
                       </div>
                     </div>
                     
-                    <button className="w-full mt-6 py-2 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors">
+                    <button className="w-full py-2 mt-6 text-blue-600 transition-colors border border-blue-500 rounded-lg hover:bg-blue-50">
                       Get Directions
                     </button>
                   </div>
@@ -402,11 +402,11 @@ export default function ContactUs() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl">
-                  <FaComments className="text-white text-2xl" />
+                <div className="p-3 bg-linear-to-r from-green-500 to-emerald-500 rounded-xl">
+                  <FaComments className="text-2xl text-white" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">FAQ</h2>
@@ -418,15 +418,15 @@ export default function ContactUs() {
                 {faqs.map((faq, index) => (
                   <div
                     key={index}
-                    className="p-4 rounded-xl border border-gray-200 hover:border-blue-300 transition-colors"
+                    className="p-4 transition-colors border border-gray-200 rounded-xl hover:border-blue-300"
                   >
-                    <h3 className="font-bold text-gray-900 mb-2">{faq.question}</h3>
-                    <p className="text-gray-600 text-sm">{faq.answer}</p>
+                    <h3 className="mb-2 font-bold text-gray-900">{faq.question}</h3>
+                    <p className="text-sm text-gray-600">{faq.answer}</p>
                   </div>
                 ))}
               </div>
 
-              <button className="w-full mt-6 py-3 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+              <button className="flex items-center justify-center w-full gap-2 py-3 mt-6 text-blue-600 transition-colors border border-blue-500 rounded-lg hover:bg-blue-50">
                 View All FAQs
                 <FaArrowRight />
               </button>
@@ -437,12 +437,12 @@ export default function ContactUs() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-6 text-white"
+              className="p-6 text-white bg-linear-to-br from-blue-600 to-purple-600 rounded-2xl"
             >
-              <h2 className="text-2xl font-bold mb-6">Support Resources</h2>
+              <h2 className="mb-6 text-2xl font-bold">Support Resources</h2>
               
               <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3 p-4 transition-colors cursor-pointer rounded-xl bg-white/10 hover:bg-white/20">
                   <FaLightbulb className="text-2xl text-yellow-300" />
                   <div>
                     <div className="font-semibold">Help Center</div>
@@ -450,7 +450,7 @@ export default function ContactUs() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3 p-4 transition-colors cursor-pointer rounded-xl bg-white/10 hover:bg-white/20">
                   <FaShieldAlt className="text-2xl text-green-300" />
                   <div>
                     <div className="font-semibold">Safety Center</div>
@@ -458,7 +458,7 @@ export default function ContactUs() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3 p-4 transition-colors cursor-pointer rounded-xl bg-white/10 hover:bg-white/20">
                   <FaStar className="text-2xl text-yellow-300" />
                   <div>
                     <div className="font-semibold">Community Forum</div>
@@ -473,9 +473,9 @@ export default function ContactUs() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
+              className="p-6 bg-white border border-gray-200 shadow-lg rounded-2xl"
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+              <h2 className="mb-6 text-xl font-bold text-center text-gray-900">
                 Connect With Us
               </h2>
               
@@ -504,12 +504,12 @@ export default function ContactUs() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200"
+              className="p-6 border border-green-200 bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl"
             >
               <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900 mb-2">2.4 hrs</div>
-                <div className="text-gray-700 font-medium">Average Response Time</div>
-                <div className="text-sm text-gray-600 mt-2">
+                <div className="mb-2 text-4xl font-bold text-gray-900">2.4 hrs</div>
+                <div className="font-medium text-gray-700">Average Response Time</div>
+                <div className="mt-2 text-sm text-gray-600">
                   We pride ourselves on quick responses to all inquiries
                 </div>
               </div>
@@ -524,21 +524,21 @@ export default function ContactUs() {
           transition={{ delay: 0.6 }}
           className="mt-12"
         >
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-2xl">
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-gray-900">Find Us on Map</h2>
               <p className="text-gray-600">Visit our headquarters or find the nearest office</p>
             </div>
             
-            <div className="h-96 bg-gradient-to-r from-blue-100 to-cyan-100 relative">
+            <div className="relative h-96 bg-linear-to-r from-blue-100 to-cyan-100">
               {/* Map Placeholder */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <FaMapMarkerAlt className="text-4xl text-blue-500 mx-auto mb-4 animate-bounce" />
-                  <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 max-w-md mx-auto">
-                    <h3 className="font-bold text-gray-900 mb-2">Our Headquarters</h3>
+                  <FaMapMarkerAlt className="mx-auto mb-4 text-4xl text-blue-500 animate-bounce" />
+                  <div className="max-w-md p-6 mx-auto bg-white/90 backdrop-blur-sm rounded-xl">
+                    <h3 className="mb-2 font-bold text-gray-900">Our Headquarters</h3>
                     <p className="text-gray-700">123 Business Center, Andheri West, Mumbai 400053</p>
-                    <button className="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                    <button className="px-4 py-2 mt-4 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
                       Open in Maps
                     </button>
                   </div>
@@ -556,10 +556,10 @@ export default function ContactUs() {
                   }}
                 >
                   <div className="relative">
-                    <div className="w-8 h-8 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white">
+                    <div className="flex items-center justify-center w-8 h-8 text-white bg-red-500 border-4 border-white rounded-full shadow-lg">
                       {index + 1}
                     </div>
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white rounded-lg shadow-lg p-3 min-w-[200px] hidden group-hover:block">
+                    <div className="absolute hidden p-3 mt-2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg top-full left-1/2 min-w-50 group-hover:block">
                       <div className="font-bold text-gray-900">{office.city}</div>
                       <div className="text-sm text-gray-600">{office.address}</div>
                     </div>
@@ -577,17 +577,17 @@ export default function ContactUs() {
           transition={{ delay: 0.7 }}
           className="mt-12 text-center"
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12 text-white">
-            <h2 className="text-3xl font-bold mb-4">Still Have Questions?</h2>
-            <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+          <div className="p-12 text-white bg-linear-to-r from-blue-600 to-purple-600 rounded-2xl">
+            <h2 className="mb-4 text-3xl font-bold">Still Have Questions?</h2>
+            <p className="max-w-2xl mx-auto mb-8 text-xl opacity-90">
               Our dedicated support team is ready to help you with any questions or concerns.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 rounded-xl bg-white text-blue-600 hover:bg-gray-100 font-semibold transition-colors flex items-center justify-center gap-2">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <button className="flex items-center justify-center gap-2 px-8 py-3 font-semibold text-blue-600 transition-colors bg-white rounded-xl hover:bg-gray-100">
                 <FaPhone />
                 Call Support Now
               </button>
-              <button className="px-8 py-3 rounded-xl border-2 border-white text-white hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+              <button className="flex items-center justify-center gap-2 px-8 py-3 text-white transition-colors border-2 border-white rounded-xl hover:bg-white/10">
                 <FaWhatsapp />
                 Chat on WhatsApp
               </button>
