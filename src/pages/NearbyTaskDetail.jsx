@@ -19,13 +19,16 @@ import {
   FaLock,
   FaGlobe,
   FaEdit,
+  FaTrash,
   FaShareAlt,
   FaBookmark,
   FaRupeeSign,
   FaInfoCircle,
   FaStar,
   FaCrown,
-  FaCalendarCheck
+  FaCalendarCheck,
+  FaVideo,
+  FaComment
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -37,7 +40,7 @@ export default function NearbyTaskDetail() {
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAccepting, setIsAccepting] = useState(false);
+  const [acceptingTask, setAcceptingTask] = useState(false);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -85,7 +88,7 @@ export default function NearbyTaskDetail() {
   };
 
   const acceptTask = async () => {
-    setIsAccepting(true);
+    setAcceptingTask(true);
     const token = sessionStorage.getItem("token");
 
     try {
@@ -101,16 +104,15 @@ export default function NearbyTaskDetail() {
 
       if (data.success) {
         alert("Task accepted successfully!");
-        setTimeout(() => {
-          navigate("/nearby-tasks");
-        }, 1000);
+        // Refresh the task details
+        window.location.reload();
       } else {
         alert(data.message || "Failed to accept task");
-        setIsAccepting(false);
       }
     } catch (error) {
       alert("Something went wrong");
-      setIsAccepting(false);
+    } finally {
+      setAcceptingTask(false);
     }
   };
 
@@ -118,20 +120,17 @@ export default function NearbyTaskDetail() {
     const now = new Date();
     const created = new Date(createdAt);
     const diffMs = now - created;
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) {
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      if (diffHours === 0) {
-        const diffMinutes = Math.floor(diffMs / (1000 * 60));
-        return diffMinutes === 0 ? 'Just now' : `${diffMinutes} min ago`;
-      } else {
-        return `${diffHours} hr ago`;
-      }
+
+    if (diffMinutes < 60) {
+      return diffMinutes === 0 ? 'Just now' : `${diffMinutes} minutes ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hours ago`;
+    } else {
+      return `${diffDays} days ago`;
     }
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
   };
 
   const statusConfig = {
@@ -139,31 +138,31 @@ export default function NearbyTaskDetail() {
       text: "Pending",
       color: "bg-green-50 text-green-700 border-green-200",
       icon: <FaCheckCircle className="text-green-500" />,
-      badge: "bg-gradient-to-r from-green-400 to-emerald-500"
+      badge: "bg-linear-to-r from-green-400 to-emerald-500"
     },
-    "assigned": {
-      text: "Assigned",
+    "accepted": {
+      text: "Accepted",
       color: "bg-orange-50 text-orange-700 border-orange-200",
       icon: <FaUser className="text-orange-500" />,
-      badge: "bg-gradient-to-r from-orange-400 to-amber-500"
+      badge: "bg-linear-to-r from-orange-400 to-amber-500"
     },
     "in-progress": {
       text: "In Progress",
       color: "bg-blue-50 text-blue-700 border-blue-200",
       icon: <FaClock className="text-blue-500" />,
-      badge: "bg-gradient-to-r from-blue-400 to-cyan-500"
+      badge: "bg-linear-to-r from-blue-400 to-cyan-500"
     },
     "completed": {
       text: "Completed",
       color: "bg-emerald-50 text-emerald-700 border-emerald-200",
       icon: <FaCalendarCheck className="text-emerald-500" />,
-      badge: "bg-gradient-to-r from-emerald-400 to-teal-500"
+      badge: "bg-linear-to-r from-emerald-400 to-teal-500"
     },
     "cancelled": {
       text: "Cancelled",
       color: "bg-red-50 text-red-700 border-red-200",
       icon: <FaTimesCircle className="text-red-500" />,
-      badge: "bg-gradient-to-r from-red-400 to-pink-500"
+      badge: "bg-linear-to-r from-red-400 to-pink-500"
     }
   };
 
@@ -171,7 +170,7 @@ export default function NearbyTaskDetail() {
     "urgent": {
       text: "Urgent",
       icon: <FaExclamationCircle className="animate-pulse" />,
-      color: "bg-gradient-to-r from-red-500 to-pink-600 text-white"
+      color: "bg-linear-to-r from-red-500 to-pink-600 text-white"
     },
     "normal": {
       text: "Normal",
@@ -181,15 +180,13 @@ export default function NearbyTaskDetail() {
   };
 
   const getCategoryName = (categoryId) => {
-    const category = categories.find(cat => cat.id === parseInt(categoryId));
+    const category = categories.find(cat => cat.id == categoryId);
     return category ? category.name : categoryId;
   };
 
-
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
@@ -205,10 +202,10 @@ export default function NearbyTaskDetail() {
 
   if (error || !task) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
         <div className="max-w-md p-8 text-center">
           <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-400 to-pink-500 opacity-20 blur-xl"></div>
+            <div className="absolute inset-0 rounded-full bg-linear-to-r from-red-400 to-pink-500 opacity-20 blur-xl"></div>
             <FaTimesCircle className="relative text-6xl text-red-500" />
           </div>
           <h2 className="mb-3 text-2xl font-bold text-gray-900">Task Not Found</h2>
@@ -229,22 +226,22 @@ export default function NearbyTaskDetail() {
   const urgency = urgencyConfig[task.urgency_level] || urgencyConfig.normal;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50">
       <div className="relative">
         {/* Header Background */}
-        <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500"></div>
+        <div className="absolute inset-x-0 top-0 h-64 bg-linear-to-r from-blue-500 via-blue-600 to-cyan-500"></div>
 
         <div className="relative max-w-6xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
           {/* Back Button */}
-            <div className="mb-8">
-              <Link
-                to="/tasks"
-                className="inline-flex items-center gap-3 px-5 py-3 font-medium text-blue-600 transition-all duration-300 bg-white rounded-xl hover:bg-blue-50 hover:shadow-lg"
-              >
-                <FaArrowLeft />
-                Back to Nearby Tasks
-              </Link>
-            </div>
+          <div className="mb-8">
+            <Link
+              to="/my-tasks"
+              className="inline-flex items-center gap-3 px-5 py-3 font-bold text-black transition-all duration-300 bg-white backdrop-blur-sm rounded-xl hover:bg-gray-100 hover:shadow-lg"
+            >
+              <FaArrowLeft />
+              Back to Nearby Tasks
+            </Link>
+          </div>
 
           {/* Main Card */}
           <motion.div
@@ -270,17 +267,32 @@ export default function NearbyTaskDetail() {
                         {urgency.icon}
                         {urgency.text}
                       </span>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        getCategoryName(task.category) === "Delivery" ? "bg-blue-100 text-blue-700" :
-                        getCategoryName(task.category) === "Cleaning" ? "bg-green-100 text-green-700" :
-                        getCategoryName(task.category) === "Online Help" ? "bg-purple-100 text-purple-700" :
-                        "bg-yellow-100 text-yellow-700"
-                      }`}>
+                      <span className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-full">
+                        <FaMoneyBillWave />
                         {getCategoryName(task.category)}
                       </span>
                     </div>
 
                     <h1 className="mb-4 text-4xl font-bold text-gray-900 lg:text-5xl">{task.title}</h1>
+
+                    {/* New Task Image Section */}
+                    {task.image && (
+                      <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-gray-50 to-white rounded-2xl">
+                        <h2 className="flex items-center gap-3 mb-4 text-2xl font-bold text-gray-900">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <FaImage className="text-blue-600" />
+                          </div>
+                          Task Image
+                        </h2>
+                        <div className="flex justify-center">
+                          <img
+                            src={task.image}
+                            alt="Task Image"
+                            className="h-auto max-w-full rounded-lg shadow-md max-h-96"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex flex-wrap items-center gap-4 text-gray-600">
                       <span className="flex items-center gap-2">
@@ -295,7 +307,7 @@ export default function NearbyTaskDetail() {
                   </div>
 
                   {/* Price Card */}
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 min-w-[200px]">
+                  <div className="p-6 bg-linear-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-100 min-w-[200px]">
                     <div className="mb-2 text-sm font-medium text-blue-700">Budget</div>
                     <div className="flex items-baseline gap-2">
                       <FaRupeeSign className="text-2xl text-blue-600" />
@@ -308,8 +320,27 @@ export default function NearbyTaskDetail() {
                 </div>
               </div>
 
+              {/* Task Image Section */}
+              {task.image && (
+                <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-gray-50 to-white rounded-2xl">
+                  <h2 className="flex items-center gap-3 mb-4 text-2xl font-bold text-gray-900">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <FaImage className="text-blue-600" />
+                    </div>
+                    Task Image
+                  </h2>
+                  <div className="flex justify-center">
+                    <img
+                      src={task.image}
+                      alt="Task Image"
+                      className="h-auto max-w-full rounded-lg shadow-md max-h-96"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Description Card */}
-              <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-gray-50 to-white rounded-2xl">
+              <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                 <h2 className="flex items-center gap-3 mb-4 text-2xl font-bold text-gray-900">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <FaInfoCircle className="text-blue-600" />
@@ -319,11 +350,73 @@ export default function NearbyTaskDetail() {
                 <p className="text-lg leading-relaxed text-gray-700">{task.description}</p>
               </div>
 
+              {/* Progress Section */}
+              <div className="p-6 mb-8 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
+                <h3 className="flex items-center gap-3 mb-6 text-xl font-semibold text-gray-900">
+                  <FaClock className="text-blue-500" />
+                  Task Progress
+                </h3>
+                <div className="relative">
+                  {(() => {
+                    const statusOrder = { 'open': 0, 'accepted': 1, 'in-progress': 2, 'completed': 3 };
+                    const currentStep = statusOrder[task.status] || 0;
+
+                    return (
+                      <div>
+                        {/* Progress Bar Background */}
+                        <div className="w-full h-2 mb-6 bg-gray-200 rounded-full">
+                          <div
+                            className="h-2 transition-all duration-500 ease-out rounded-full bg-linear-to-r from-blue-500 to-green-500"
+                            style={{
+                              width: `${(currentStep + 1) * 25}%`
+                            }}
+                          ></div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          {[
+                            { key: 'open', label: 'Posted', icon: <FaCheckCircle className="text-xs" /> },
+                            { key: 'accepted', label: 'Accepted', icon: <FaCheckCircle className="text-xs" /> },
+                            { key: 'in-progress', label: 'In Progress', icon: <FaClock className="text-xs" /> },
+                            { key: 'completed', label: 'Completed', icon: <FaCalendarCheck className="text-xs" /> }
+                          ].map((step, index) => {
+                            const isActive = currentStep >= index;
+                            const isCompleted = currentStep > index;
+
+                            return (
+                              <div key={step.key} className="flex flex-col items-center flex-1">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 border-4 ${
+                                  isCompleted ? 'bg-green-500 text-white border-green-500 shadow-lg' :
+                                  isActive ? 'bg-blue-500 text-white border-blue-500 shadow-lg' :
+                                  'bg-white text-gray-500 border-gray-300'
+                                }`}>
+                                  {step.icon}
+                                </div>
+                                <span className={`text-xs font-medium text-center ${
+                                  isActive ? 'text-blue-600' : 'text-gray-500'
+                                }`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="mt-6 text-center">
+                          <span className="text-sm text-gray-600">
+                            Current Status: <span className="font-semibold text-blue-600">{status.text}</span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
               {/* Details Grid */}
               <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
                 {/* Left Column */}
                 <div className="space-y-6">
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                     <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                       <FaCalendarAlt className="text-blue-500" />
                       Timeline Details
@@ -341,69 +434,75 @@ export default function NearbyTaskDetail() {
                         <div className="flex items-center gap-3 mt-1">
                           <FaClock className="text-gray-400" />
                           <span className="text-lg font-medium text-gray-900">
-                            {task.duration ? (task.duration >= 60 ? `${Math.floor(task.duration / 60)} hr` : `${task.duration} min`) : 'Not specified'}
+                            {task.duration ? (Number(task.duration) < 60 ? `${task.duration} minutes` : `${Math.round(Number(task.duration) / 60)} hours`) : 'Not specified'}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                     <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaUser className="text-green-500" />
+                      <FaUser className="text-amber-500" />
                       User Information
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <FaUser className="text-blue-600" />
+                        <div className="p-2 rounded-lg bg-amber-100">
+                          <FaUser className="text-amber-600" />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{task.user?.name || 'N/A'}</div>
-                          <div className="text-sm text-gray-500">ID: {task.user?.id || 'N/A'}</div>
+                          <div className="font-medium text-gray-900">{task.user.name}</div>
+                          <div className="text-sm text-gray-500">{task.user.user_uid}</div>
                         </div>
                       </div>
-                      {task.user?.email && (
-                        <div className="flex items-center gap-3">
-                          <FaEnvelope className="text-gray-400" />
-                          <span className="text-gray-900">{task.user.email}</span>
-                        </div>
-                      )}
-                      {task.user?.phone && (
-                        <div className="flex items-center gap-3">
-                          <FaPhone className="text-gray-400" />
-                          <span className="text-gray-900">{task.user.phone}</span>
-                        </div>
-                      )}
+                      <div className="flex gap-3 pt-4 border-t border-gray-200">
+                        {task.contact_preference === 'message' ? (
+                          <div className="flex items-center gap-2">
+                            <FaEnvelope className="text-blue-500" />
+                            <span className="font-medium text-gray-900">Message Only</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <FaPhone className="text-green-500" />
+                            <span className="font-medium text-gray-900">Phone Calls Allowed</span>
+                          </div>
+                        )}
+                        
+                        {task.contact_preference === 'message' ? (
+                          <button
+                            onClick={() => alert('Chat feature coming soon!')}
+                            className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
+                          >
+                            <FaComment className="text-sm" />
+                            Chat
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => alert('Voice call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg"
+                            >
+                              <FaPhone className="text-sm" />
+                              Voice Call
+                            </button>
+                            <button
+                              onClick={() => alert('Video call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+                            >
+                              <FaVideo className="text-sm" />
+                              Video Call
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaCrown className="text-amber-500" />
-                      Helper Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-amber-100">
-                          <FaUser className="text-amber-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {task.assigned_helper?.name || 'Not assigned yet'}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {task.assigned_helper ? 'Assigned Helper' : 'Looking for helper'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                     <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                       <FaShieldAlt className="text-purple-500" />
                       Task Settings
@@ -443,12 +542,36 @@ export default function NearbyTaskDetail() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
+                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
+                      <FaStar className="text-yellow-500" />
+                      Required Skills
+                    </h3>
+                    <div className="space-y-3">
+                      {task.skills ? (
+                        <div className="flex flex-wrap gap-2">
+                          {Array.isArray(task.skills) ? task.skills.map(skillObj => (
+                            <span key={skillObj.id} className="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
+                              {skillObj.skill}
+                            </span>
+                          )) : (
+                            <span className="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
+                              {task.skills}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500">No specific skills required</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Address and Additional Info */}
               <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
-                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaMapMarkerAlt className="text-red-500" />
                     Location Details
@@ -462,7 +585,7 @@ export default function NearbyTaskDetail() {
                 </div>
 
                 {task.additional_info && (
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <div className="p-6 border border-gray-100 bg-linear-to-br from-white to-gray-50 rounded-2xl">
                     <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                       <FaInfoCircle className="text-cyan-500" />
                       Additional Information
@@ -472,89 +595,20 @@ export default function NearbyTaskDetail() {
                 )}
               </div>
 
-              {/* Skills Section */}
-              {task.skills && task.skills.length > 0 && (
-                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                    <FaTag className="text-purple-500" />
-                    Required Skills
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {task.skills.map((skillObj, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center gap-2 px-4 py-2 font-medium text-purple-700 transition-shadow border border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl hover:shadow-md"
-                      >
-                        <FaTag className="text-purple-500" />
-                        {skillObj.skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Images Gallery */}
-              {task.images && task.images.length > 0 && (
-                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                    <FaImage className="text-amber-500" />
-                    Task Images
-                  </h3>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {task.images.map((image, index) => (
-                      <motion.div
-                        key={index}
-                        whileHover={{ scale: 1.02 }}
-                        className="overflow-hidden border border-gray-200 rounded-xl"
-                      >
-                        <img
-                          src={image.full_url}
-                          alt={`Task image ${index + 1}`}
-                          className="object-cover w-full h-48 transition-transform duration-300 hover:scale-105"
-                          onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Actions Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-8 mt-8 border-t border-gray-200">
-                <div className="flex items-center gap-3 text-sm text-gray-500">
-                  <span className="flex items-center gap-2">
-                    <FaClock className="text-gray-400" />
-                    Created: {formatDateTime(task.created_at)}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <FaClock className="text-gray-400" />
-                    Updated: {formatDateTime(task.updated_at)}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-4 sm:flex-row">
+                {task.status === 'open' && (
                   <button
                     onClick={acceptTask}
-                    disabled={isAccepting}
-                    className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:from-green-600 hover:to-emerald-700 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
+                    disabled={acceptingTask}
+                    className="flex-1 px-8 py-4 font-bold text-white transition-all duration-300 bg-linear-to-r from-blue-600 to-blue-700 rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
                   >
-                    <FaCheckCircle />
-                    {isAccepting ? "Accepting..." : "Accept Task"}
+                    {acceptingTask ? 'Accepting...' : 'Accept Task'}
                   </button>
-                </div>
+                )}
               </div>
             </div>
           </motion.div>
-
-          {/* Task ID Footer */}
-          <div className="mt-6 text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-white rounded-full shadow-sm">
-              <FaInfoCircle className="text-gray-400" />
-              Task ID: #{task.id}
-            </span>
-          </div>
         </div>
       </div>
     </div>

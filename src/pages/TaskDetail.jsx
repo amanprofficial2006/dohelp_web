@@ -194,7 +194,7 @@ export default function TaskDetail() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="w-16 h-16 mx-auto mb-6 border-4 border-blue-200 rounded-full border-t-blue-500"
-          ></motion.div>
+          />
           <p className="text-lg font-medium text-gray-700">Loading task details...</p>
           <p className="text-sm text-gray-500">Please wait a moment</p>
         </div>
@@ -212,17 +212,14 @@ export default function TaskDetail() {
           </div>
           <h2 className="mb-3 text-2xl font-bold text-gray-900">Task Not Found</h2>
           <p className="mb-6 text-gray-600">{error || "The task you're looking for doesn't exist or has been removed."}</p>
-<Link
-  to="/posted-tasks"
-  className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-black/40 backdrop-blur-md rounded-xl hover:bg-black/60"
->
-  <FaArrowLeft />
-  Back to My Tasks
-</Link>
-
-
-   
-     </div>
+          <Link
+            to="/posted-tasks"
+            className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-black/40 backdrop-blur-md rounded-xl hover:bg-black/60"
+          >
+            <FaArrowLeft />
+            Back to My Tasks
+          </Link>
+        </div>
       </div>
     );
   }
@@ -269,7 +266,7 @@ export default function TaskDetail() {
 
       <div className="relative">
         {/* Header Background */}
-        <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500"></div>
+        <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500" />
 
         <div className="relative max-w-6xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
           {/* Back Button */}
@@ -372,7 +369,7 @@ export default function TaskDetail() {
                             style={{
                               width: `${(currentStep + 1) * 25}%`
                             }}
-                          ></div>
+                          />
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -414,207 +411,181 @@ export default function TaskDetail() {
                 </div>
               </div>
 
-              {/* Details Grid */}
+              {/* Main Details Grid */}
               <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaCalendarAlt className="text-blue-500" />
-                      Timeline Details
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-500">Deadline</div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <FaCalendarAlt className="text-gray-400" />
-                          <span className="text-lg font-medium text-gray-900">{formatDateTime(task.deadline)}</span>
-                        </div>
-                      </div>
-                      <div>
-
-                        <div className="text-sm font-medium text-gray-500">Duration</div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <FaClock className="text-gray-400" />
-                          <span className="text-lg font-medium text-gray-900">
-                            {task.duration ? (Number(task.duration) < 60 ? `${task.duration} minutes` : `${Math.round(Number(task.duration) / 60)} hours`) : 'Not specified'}
-                          </span>
-                        </div>
+                {/* Timeline Details */}
+                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
+                    <FaCalendarAlt className="text-blue-500" />
+                    Timeline Details
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-sm font-medium text-gray-500">Deadline</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <FaCalendarAlt className="text-gray-400" />
+                        <span className="text-lg font-medium text-gray-900">
+                          {formatDateTime(task.deadline)}
+                        </span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaUser className="text-green-500" />
-                      User Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <FaUser className="text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{task.user?.name || 'N/A'}</div>
-                          <div className="text-sm text-gray-500">ID: {task.user?.id || 'N/A'}</div>
-                        </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-500">Duration</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <FaClock className="text-gray-400" />
+                        <span className="text-lg font-medium text-gray-900">
+                          {task.duration
+                            ? Number(task.duration) < 60
+                              ? `${task.duration} minutes`
+                              : `${Math.round(Number(task.duration) / 60)} hours`
+                            : "Not specified"}
+                        </span>
                       </div>
-                      {task.user?.email && (
-                        <div className="flex items-center gap-3">
-                          <FaEnvelope className="text-gray-400" />
-                          <span className="text-gray-900">{task.user.email}</span>
-                        </div>
-                      )}
-                      {task.user?.phone && (
-                        <div className="flex items-center gap-3">
-                          <FaPhone className="text-gray-400" />
-                          <span className="text-gray-900">{task.user.phone}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaCrown className="text-amber-500" />
-                      Helper Information
-                    </h3>
-                    <div className="space-y-4">
-                      {task.helper ? (
-                        <>
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-amber-100">
-                              <FaUser className="text-amber-600" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900">{task.helper.name}</div>
-                              <div className="text-sm text-gray-500">Helper ID: {task.helper.user_uid}</div>
-                            </div>
+                {/* Helper Information */}
+                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
+                    <FaCrown className="text-amber-500" />
+                    Helper Information
+                  </h3>
+                  <div className="space-y-4">
+                    {task.helper ? (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-amber-100">
+                            <FaUser className="text-amber-600" />
                           </div>
-                          <div className="flex gap-3 pt-4 border-t border-gray-200">
-                            <button
-                              onClick={() => alert('Voice call feature coming soon!')}
-                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg"
-                            >
-                              <FaPhone className="text-sm" />
-                              Voice Call
-                            </button>
-                            <button
-                              onClick={() => alert('Video call feature coming soon!')}
-                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
-                            >
-                              <FaVideo className="text-sm" />
-                              Video Call
-                            </button>
-                            <button
-                              onClick={() => alert('Chat feature coming soon!')}
-                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
-                            >
-                              <FaComment className="text-sm" />
-                              Chat
-                            </button>
+                          <div>
+                            <div className="font-medium text-gray-900">{task.helper.name}</div>
+                            <div className="text-sm text-gray-500">Helper ID: {task.helper.user_uid}</div>
                           </div>
-                        </>
-                      ) : (
-                        <div className="py-8 text-center">
-                          <FaUser className="mx-auto mb-4 text-4xl text-gray-400" />
-                          <p className="text-gray-600">Helper not assigned yet</p>
-                          <p className="mt-2 text-sm text-gray-500">Details will be available once a helper accepts the task</p>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaShieldAlt className="text-purple-500" />
-                      Task Settings
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-500">Contact Preference</div>
-                        <div className="flex items-center gap-3 mt-1">
-                          {task.contact_preference === 'message' ? (
+                        {/* Contact Buttons */}
+                        <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+                          {task.contact_preference === "call" && (
                             <>
-                              <FaEnvelope className="text-blue-500" />
-                              <span className="font-medium text-gray-900">Message Only</span>
-                            </>
-                          ) : (
-                            <>
-                              <FaPhone className="text-green-500" />
-                              <span className="font-medium text-gray-900">Phone Calls Allowed</span>
+                              <button
+                                onClick={() => alert("Voice call feature coming soon!")}
+                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg"
+                              >
+                                <FaPhone className="text-sm" /> Voice Call
+                              </button>
+                              <button
+                                onClick={() => alert("Video call feature coming soon!")}
+                                className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:shadow-lg"
+                              >
+                                <FaVideo className="text-sm" /> Video Call
+                              </button>
                             </>
                           )}
+                          <button
+                            onClick={() => alert("Chat feature coming soon!")}
+                            className="flex items-center gap-2 px-4 py-2 font-medium text-white rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:shadow-lg"
+                          >
+                            <FaComment className="text-sm" /> Chat
+                          </button>
                         </div>
+                      </>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <FaUser className="mx-auto mb-4 text-4xl text-gray-400" />
+                        <p className="text-gray-600">Helper not assigned yet</p>
+                        <p className="mt-2 text-sm text-gray-500">Waiting for helper acceptance</p>
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-500">Privacy</div>
-                        <div className="flex items-center gap-3 mt-1">
-                          {task.privacy === 'public' ? (
-                            <>
-                              <FaGlobe className="text-green-500" />
-                              <span className="font-medium text-gray-900">Public Task</span>
-                            </>
-                          ) : (
-                            <>
-                              <FaLock className="text-gray-500" />
-                              <span className="font-medium text-gray-900">Private Task</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              {/* Address and Additional Info */}
-              <div className="grid grid-cols-1 gap-6 mb-8 lg:grid-cols-2">
+                {/* Location Details */}
                 <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
                     <FaMapMarkerAlt className="text-red-500" />
                     Location Details
                   </h3>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
                       <div className="text-sm font-medium text-gray-500">Address</div>
-                      <p className="mt-1 text-gray-900">{task.address || 'Address not provided'}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <FaMapMarkerAlt className="text-gray-400" />
+                        <span className="text-gray-900">{task.address || "Not provided"}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {task.additional_info && (
-                  <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
-                    <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                      <FaInfoCircle className="text-cyan-500" />
-                      Additional Information
-                    </h3>
-                    <p className="text-gray-700">{task.additional_info}</p>
+                {/* Task Settings */}
+                <div className="p-6 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
+                    <FaShieldAlt className="text-purple-500" />
+                    Task Settings
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-sm font-medium text-gray-500">Contact Preference</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        {task.contact_preference === "message" ? (
+                          <>
+                            <FaEnvelope className="text-blue-500" />
+                            <span className="font-medium text-gray-900">Message Only</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaPhone className="text-green-500" />
+                            <span className="font-medium text-gray-900">Phone Calls Allowed</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-500">Privacy</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        {task.privacy === "public" ? (
+                          <>
+                            <FaGlobe className="text-green-500" />
+                            <span className="font-medium text-gray-900">Public Task</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaLock className="text-gray-500" />
+                            <span className="font-medium text-gray-900">Private Task</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Skills Section */}
-              {task.skills && task.skills.length > 0 && (
+              {/* Required Skills */}
+              {task.skills?.length > 0 && (
                 <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
                   <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
-                    <FaTag className="text-purple-500" />
-                    Required Skills
+                    <FaTag className="text-purple-500" /> Required Skills
                   </h3>
                   <div className="flex flex-wrap gap-3">
                     {task.skills.map((skillObj, index) => (
                       <span
                         key={index}
-                        className="flex items-center gap-2 px-4 py-2 font-medium text-purple-700 transition-shadow border border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl hover:shadow-md"
+                        className="flex items-center gap-2 px-4 py-2 font-medium text-purple-700 border border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl hover:shadow-md"
                       >
-                        <FaTag className="text-purple-500" />
-                        {skillObj.skill}
+                        <FaTag className="text-purple-500" /> {skillObj.skill}
                       </span>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Additional Info */}
+              {task.additional_info && (
+                <div className="p-6 mb-8 border border-gray-100 bg-gradient-to-br from-white to-gray-50 rounded-2xl">
+                  <h3 className="flex items-center gap-3 mb-4 text-xl font-semibold text-gray-900">
+                    <FaInfoCircle className="text-cyan-500" />
+                    Additional Information
+                  </h3>
+                  <p className="text-gray-700">{task.additional_info}</p>
                 </div>
               )}
 
@@ -637,7 +608,8 @@ export default function TaskDetail() {
                           alt={`Task image ${index + 1}`}
                           className="object-cover w-full h-48 transition-transform duration-300 hover:scale-105"
                           onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+                            e.target.src =
+                              "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=500&q=80";
                           }}
                         />
                       </motion.div>
@@ -660,23 +632,20 @@ export default function TaskDetail() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                 
-                  
-                  {task.status === 'open' && (
+                  {task.status === "open" && (
                     <Link
                       to="/post-task"
                       state={{ task: task, isEdit: true }}
-                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:-translate-y-0.5"
+                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:shadow-lg"
                     >
                       <FaEdit />
                       Edit Task
                     </Link>
                   )}
-                  
-                  {task.status === 'open' && (
+                  {task.status === "open" && (
                     <button
                       onClick={() => setShowDeleteModal(true)}
-                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:from-red-600 hover:to-pink-700 hover:shadow-lg hover:-translate-y-0.5"
+                      className="flex items-center gap-2 px-5 py-3 font-medium text-white transition-all duration-300 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl hover:shadow-lg"
                     >
                       <FaTrash />
                       Delete Task
@@ -684,16 +653,16 @@ export default function TaskDetail() {
                   )}
                 </div>
               </div>
+
+              {/* Task ID Footer */}
+              <div className="mt-6 text-center">
+                <span className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-white rounded-full shadow-sm">
+                  <FaInfoCircle className="text-gray-400" />
+                  Task ID: #{task.id}
+                </span>
+              </div>
             </div>
           </motion.div>
-
-          {/* Task ID Footer */}
-          <div className="mt-6 text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 bg-white rounded-full shadow-sm">
-              <FaInfoCircle className="text-gray-400" />
-              Task ID: #{task.id}
-            </span>
-          </div>
         </div>
       </div>
     </div>

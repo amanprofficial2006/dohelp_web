@@ -1,10 +1,10 @@
-# TODO: Modify MyTasks.jsx to integrate nearby tasks API
+# Task: Modify TaskDetail.jsx for Contact Preferences and Layout
 
-- [ ] Import required hooks: useState, useEffect, useAuth, useCategories, useTasks
-- [ ] Add state variables: nearbyTasks, loadingNearby, errorNearby
-- [ ] Add useEffect to fetch nearby tasks from API
-- [ ] Change "pending" tab to "nearby" in tabs array and labels
-- [ ] Replace static tasks.pending with dynamic nearbyTasks for nearby tab
-- [ ] Remove static tasks object and use dynamic data
-- [ ] Update empty state for nearby tab
-- [ ] Test API integration and UI rendering
+## Steps to Complete:
+
+- [x] Remove the User Information div from the left column in the Details Grid
+- [x] Modify the Helper Information section to show contact buttons based on contact_preference:
+  - If contact_preference === 'message', show only Chat button
+  - If contact_preference === 'phone', show Voice Call, Video Call, and Chat buttons
+- [x] Ensure the layout remains intact (grid structure preserved)
+- [x] Fix indentation and formatting issues in the error page section

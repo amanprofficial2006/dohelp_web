@@ -140,7 +140,8 @@ export default function NearbyTasks() {
             location: task.location,
             time: formatTimeAgo(task.created_at),
             category: task.category,
-            urgent: task.urgency_level === 'urgent'
+            urgent: task.urgency_level === 'urgent',
+            status: task.status
           }));
           setNearbyTasks(transformedTasks);
         } else {
@@ -156,7 +157,7 @@ export default function NearbyTasks() {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-b from-gray-50 to-blue-50 md:p-6">
+    <div className="min-h-screen p-4 bg-linear-to-b from-gray-50 to-blue-50 md:p-6">
       <div className="mx-auto max-w-7xl">
         
         {/* Welcome Header */}
@@ -180,7 +181,7 @@ export default function NearbyTasks() {
               
               <Link
                 to="/post-task"
-                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl"
               >
                 <FaPlusCircle className="text-white" />
                 <span className="text-white">Post a Task</span>
@@ -202,28 +203,28 @@ export default function NearbyTasks() {
               value: `₹${userStats.earnings.toLocaleString()}`, 
               icon: <FaMoneyBillWave className="text-green-500" />, 
               change: "+12%", 
-              color: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-100" 
+              color: "bg-linear-to-r from-green-50 to-emerald-50 border-green-100" 
             },
             { 
               title: "Completed Tasks", 
               value: userStats.completedTasks, 
               icon: <FaCheckCircle className="text-blue-500" />, 
               change: "+3", 
-              color: "bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-100" 
+              color: "bg-linear-to-r from-blue-50 to-cyan-50 border-blue-100" 
             },
             { 
               title: "Your Rating", 
               value: userStats.rating, 
               icon: <FaStar className="text-yellow-500" />, 
               change: "4.8", 
-              color: "bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-100" 
+              color: "bg-linear-to-r from-yellow-50 to-amber-50 border-yellow-100" 
             },
             { 
               title: "Active Tasks", 
               value: userStats.activeTasks, 
               icon: <FaClock className="text-purple-500" />, 
               change: "2 ongoing", 
-              color: "bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100" 
+              color: "bg-linear-to-r from-purple-50 to-pink-50 border-purple-100" 
             },
           ].map((stat, index) => (
             <div key={index} className={`${stat.color} rounded-2xl p-6 border shadow-sm`}>
@@ -291,7 +292,7 @@ export default function NearbyTasks() {
                       onClick={() => setActiveTab(tab)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         activeTab === tab
-                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                          ? "bg-linear-to-r from-blue-500 to-purple-500 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
@@ -354,15 +355,16 @@ export default function NearbyTasks() {
                     {errorNearby}
                   </div>
                 ) : (() => {
-                  // Filter tasks based on search query
+                  // Filter tasks to show only pending tasks, then apply search query
+                  const pendingTasks = nearbyTasks.filter(task => task.status === 'pending');
                   const filteredTasks = searchQuery
-                    ? nearbyTasks.filter(task =>
+                    ? pendingTasks.filter(task =>
                         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         task.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         getCategoryName(task.category).toLowerCase().includes(searchQuery.toLowerCase())
                       )
-                    : nearbyTasks;
+                    : pendingTasks;
 
                   return filteredTasks.length > 0 ? (
                     filteredTasks.map((task) => (
@@ -410,7 +412,7 @@ export default function NearbyTasks() {
                             <div className="flex gap-2">
                               <Link
                                 to={`/nearby-task-detail/${task.id}`}
-                                className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                                className="px-4 py-2 text-white transition-all rounded-xl bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                                 style={{ color: 'white' }}
                               >
                                 View
@@ -418,7 +420,7 @@ export default function NearbyTasks() {
                               <button
                                 onClick={() => acceptTask(task.id)}
                                 disabled={acceptingTasks.has(task.id)}
-                                className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
+                                className="px-4 py-2 text-white transition-all rounded-xl bg-linear-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
                               >
                                 {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
                               </button>
@@ -582,7 +584,7 @@ export default function NearbyTasks() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="p-6 text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl"
+              className="p-6 text-white bg-linear-to-r from-blue-500 to-purple-600 rounded-2xl"
             >
               <h2 className="mb-6 text-xl font-bold">Your Weekly Progress</h2>
               
@@ -633,7 +635,7 @@ export default function NearbyTasks() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="p-8 border border-blue-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl"
+          className="p-8 border border-blue-100 bg-linear-to-r from-blue-50 to-purple-50 rounded-2xl"
         >
           <h2 className="mb-6 text-2xl font-bold text-center text-gray-900">
             How DoHelp Works
@@ -661,7 +663,7 @@ export default function NearbyTasks() {
               },
             ].map((step, index) => (
               <div key={index} className="text-center">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-2xl font-bold text-white rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-2xl font-bold text-white rounded-2xl bg-linear-to-r from-blue-500 to-purple-500">
                   {step.step}
                 </div>
                 <div className="p-4 bg-white border border-gray-200 rounded-xl">
