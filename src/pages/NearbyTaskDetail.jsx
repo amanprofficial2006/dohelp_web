@@ -123,12 +123,12 @@ export default function NearbyTaskDetail() {
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
       if (diffHours === 0) {
         const diffMinutes = Math.floor(diffMs / (1000 * 60));
-        return diffMinutes === 0 ? 'Just now' : `${diffMinutes} minutes ago`;
+        return diffMinutes === 0 ? 'Just now' : `${diffMinutes} min ago`;
       } else {
-        return `${diffHours} hours ago`;
+        return `${diffHours} hr ago`;
       }
     }
-    if (diffDays === 1) return 'Yesterday';
+    if (diffDays === 1) return '1 day ago';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     return `${Math.floor(diffDays / 30)} months ago`;
@@ -236,15 +236,15 @@ export default function NearbyTaskDetail() {
 
         <div className="relative max-w-6xl px-4 pt-8 mx-auto sm:px-6 lg:px-8">
           {/* Back Button */}
-          <div className="mb-8">
-            <Link
-              to="/tasks"
-              className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 hover:shadow-lg"
-            >
-              <FaArrowLeft />
-              Back to Nearby Tasks
-            </Link>
-          </div>
+            <div className="mb-8">
+              <Link
+                to="/tasks"
+                className="inline-flex items-center gap-3 px-5 py-3 font-medium text-blue-600 transition-all duration-300 bg-white rounded-xl hover:bg-blue-50 hover:shadow-lg"
+              >
+                <FaArrowLeft />
+                Back to Nearby Tasks
+              </Link>
+            </div>
 
           {/* Main Card */}
           <motion.div
@@ -341,7 +341,7 @@ export default function NearbyTaskDetail() {
                         <div className="flex items-center gap-3 mt-1">
                           <FaClock className="text-gray-400" />
                           <span className="text-lg font-medium text-gray-900">
-                            {task.duration ? `${task.duration} minutes` : 'Not specified'}
+                            {task.duration ? (task.duration >= 60 ? `${Math.floor(task.duration / 60)} hr` : `${task.duration} min`) : 'Not specified'}
                           </span>
                         </div>
                       </div>

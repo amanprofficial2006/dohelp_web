@@ -174,8 +174,26 @@ export default function PostTask() {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.slice(0, 5 - images.length);
-    setImages(prev => [...prev, ...newImages]);
+    const maxFileSize = 5 * 1024 * 1024; // 5MB per file
+    const validFiles = [];
+
+    for (const file of files) {
+      if (file.size > maxFileSize) {
+        toast.error(`File "${file.name}" is too large. Maximum size is 5MB.`);
+        continue;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error(`File "${file.name}" is not a valid image.`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    const newImages = validFiles.slice(0, 5 - images.length);
+    if (newImages.length > 0) {
+      setImages(prev => [...prev, ...newImages]);
+      toast.success(`${newImages.length} image(s) uploaded successfully.`);
+    }
   };
 
   const removeImage = (index) => {
@@ -301,7 +319,7 @@ export default function PostTask() {
     try {
       const token = sessionStorage.getItem('token');
       // Fetch user profile from API to get address
-      const response = await fetch('https://dohelp.newhopeindia17.com/api/profile', {
+      const response = await fetch('/api/profile', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -450,7 +468,7 @@ export default function PostTask() {
     }
 
     try {
-      const response = await fetch('https://dohelp.newhopeindia17.com/api/tasks', {
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -695,6 +713,9 @@ export default function PostTask() {
                         </span>
                         <span className="text-xs text-gray-500">Upload up to 5 photos to help helpers understand the task better</span>
                       </label>
+                      <div className="mb-3 text-sm font-medium text-blue-600">
+                        Image Limit: {images.length}/5 (Maximum 5 images, each up to 5MB)
+                      </div>
                       
                       <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
                         {/* Image Upload Button */}

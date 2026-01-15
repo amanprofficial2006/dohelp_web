@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../contexts/CategoriesContext";
 import { useTasks } from "../contexts/TasksContext";
-import { 
-  FaSearch, 
-  FaFilter, 
-  FaPlusCircle, 
-  FaClock, 
-  FaCheckCircle, 
+import {
+  FaSearch,
+  FaFilter,
+  FaRedoAlt,
+  FaPlusCircle,
+  FaClock,
+  FaCheckCircle,
   FaMoneyBillWave,
   FaStar,
   FaMapMarkerAlt,
@@ -32,6 +33,7 @@ export default function NearbyTasks() {
   const { categories, loading: categoriesLoading } = useCategories();
   const { userTasks, loading: tasksLoading } = useTasks();
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [userStats, setUserStats] = useState({
     completedTasks: 12,
     earnings: 12500,
@@ -264,13 +266,19 @@ export default function NearbyTasks() {
                       </div>
                       <input
                         type="text"
-                        placeholder="Search tasks..."
-                        className="w-full py-2 pl-10 pr-4 border border-gray-300 md:w-64 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Search tasks by name, description, location, category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full py-2 pl-10 pr-4 transition-colors bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
-                    
-                    <button className="p-2 transition-colors border border-gray-300 rounded-xl hover:bg-gray-50">
-                      <FaFilter className="text-gray-600" />
+
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="p-2 transition-colors border border-gray-300 rounded-xl hover:bg-gray-50"
+                      title="Clear search"
+                    >
+                      <FaRedoAlt className="text-gray-600" />
                     </button>
                   </div>
                 </div>
@@ -345,74 +353,86 @@ export default function NearbyTasks() {
                   <div className="p-6 text-center text-red-500">
                     {errorNearby}
                   </div>
-                ) : nearbyTasks.length > 0 ? (
-                  nearbyTasks.map((task) => (
-                    <motion.div
-                      key={task.id}
-                      whileHover={{ scale: 1.005 }}
-                      className="p-6 transition-colors hover:bg-gray-50"
-                    >
-                      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
-                            {task.urgent && (
-                              <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">
-                                <FaFire className="text-xs" />
-                                Urgent
+                ) : (() => {
+                  // Filter tasks based on search query
+                  const filteredTasks = searchQuery
+                    ? nearbyTasks.filter(task =>
+                        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        task.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        getCategoryName(task.category).toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                    : nearbyTasks;
+
+                  return filteredTasks.length > 0 ? (
+                    filteredTasks.map((task) => (
+                      <motion.div
+                        key={task.id}
+                        whileHover={{ scale: 1.005 }}
+                        className="p-6 transition-colors hover:bg-gray-50"
+                      >
+                        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+                              {task.urgent && (
+                                <span className="flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 rounded-full">
+                                  <FaFire className="text-xs" />
+                                  Urgent
+                                </span>
+                              )}
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                getCategoryName(task.category) === "Delivery" ? "bg-blue-100 text-blue-700" :
+                                getCategoryName(task.category) === "Cleaning" ? "bg-green-100 text-green-700" :
+                                getCategoryName(task.category) === "Online Help" ? "bg-purple-100 text-purple-700" :
+                                "bg-yellow-100 text-yellow-700"
+                              }`}>
+                                {getCategoryName(task.category)}
                               </span>
-                            )}
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              getCategoryName(task.category) === "Delivery" ? "bg-blue-100 text-blue-700" :
-                              getCategoryName(task.category) === "Cleaning" ? "bg-green-100 text-green-700" :
-                              getCategoryName(task.category) === "Online Help" ? "bg-purple-100 text-purple-700" :
-                              "bg-yellow-100 text-yellow-700"
-                            }`}>
-                              {getCategoryName(task.category)}
-                            </span>
+                            </div>
+
+                            <p className="mb-3 text-gray-600">{task.description}</p>
+
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <FaMapMarkerAlt className="text-gray-400" />
+                                {task.location}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <FaClock className="text-gray-400" />
+                                {task.time}
+                              </span>
+                            </div>
                           </div>
 
-                          <p className="mb-3 text-gray-600">{task.description}</p>
-
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <FaMapMarkerAlt className="text-gray-400" />
-                              {task.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <FaClock className="text-gray-400" />
-                              {task.time}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-3">
-                          <div className="text-2xl font-bold text-green-600">{task.amount}</div>
-                          <div className="flex gap-2">
-                            <Link
-                              to={`/nearby-task-detail/${task.id}`}
-                              className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                              style={{ color: 'white' }}
-                            >
-                              View
-                            </Link>
-                            <button
-                              onClick={() => acceptTask(task.id)}
-                              disabled={acceptingTasks.has(task.id)}
-                              className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
-                            >
-                              {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
-                            </button>
+                          <div className="flex flex-col items-end gap-3">
+                            <div className="text-2xl font-bold text-green-600">{task.amount}</div>
+                            <div className="flex gap-2">
+                              <Link
+                                to={`/nearby-task-detail/${task.id}`}
+                                className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                                style={{ color: 'white' }}
+                              >
+                                View
+                              </Link>
+                              <button
+                                onClick={() => acceptTask(task.id)}
+                                disabled={acceptingTasks.has(task.id)}
+                                className="px-4 py-2 text-white transition-all rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50"
+                              >
+                                {acceptingTasks.has(task.id) ? "Accepting..." : "Accept"}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="p-6 text-center text-gray-500">
-                    No nearby tasks available.
-                  </div>
-                )}
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-gray-500">
+                      No nearby tasks available.
+                    </div>
+                  );
+                })()}
               </div>
               
               {/* View All Link */}

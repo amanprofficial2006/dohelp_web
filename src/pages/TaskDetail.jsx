@@ -276,7 +276,7 @@ export default function TaskDetail() {
           <div className="mb-8">
             <Link
               to="/posted-tasks"
-              className="inline-flex items-center gap-3 px-5 py-3 font-medium text-white transition-all duration-300 bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 hover:shadow-lg"
+              className="inline-flex items-center gap-3 px-5 py-3 font-bold text-black transition-all duration-300 bg-white backdrop-blur-sm rounded-xl hover:bg-gray-100 hover:shadow-lg"
             >
               <FaArrowLeft />
               Back to My Tasks
@@ -366,9 +366,9 @@ export default function TaskDetail() {
                     return (
                       <>
                         {/* Progress Bar Background */}
-                        <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+                        <div className="w-full h-2 mb-6 bg-gray-200 rounded-full">
                           <div
-                            className="h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                            className="h-2 transition-all duration-500 ease-out rounded-full bg-gradient-to-r from-blue-500 to-green-500"
                             style={{
                               width: `${(currentStep + 1) * 25}%`
                             }}
@@ -483,38 +483,48 @@ export default function TaskDetail() {
                       Helper Information
                     </h3>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-amber-100">
-                          <FaUser className="text-amber-600" />
+                      {task.helper ? (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-amber-100">
+                              <FaUser className="text-amber-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">{task.helper.name}</div>
+                              <div className="text-sm text-gray-500">Helper ID: {task.helper.user_uid}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-3 pt-4 border-t border-gray-200">
+                            <button
+                              onClick={() => alert('Voice call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg"
+                            >
+                              <FaPhone className="text-sm" />
+                              Voice Call
+                            </button>
+                            <button
+                              onClick={() => alert('Video call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+                            >
+                              <FaVideo className="text-sm" />
+                              Video Call
+                            </button>
+                            <button
+                              onClick={() => alert('Chat feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
+                            >
+                              <FaComment className="text-sm" />
+                              Chat
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="py-8 text-center">
+                          <FaUser className="mx-auto mb-4 text-4xl text-gray-400" />
+                          <p className="text-gray-600">Helper not assigned yet</p>
+                          <p className="mt-2 text-sm text-gray-500">Details will be available once a helper accepts the task</p>
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{task.helper?.name || 'Aman singh'}</div>
-                          <div className="text-sm text-gray-500">Helper ID: {task.helper?.user_uid || 'USR-OGB6QVEC'}</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-3 pt-4 border-t border-gray-200">
-                        <button
-                          onClick={() => alert('Voice call feature coming soon!')}
-                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 hover:shadow-lg"
-                        >
-                          <FaPhone className="text-sm" />
-                          Voice Call
-                        </button>
-                        <button
-                          onClick={() => alert('Video call feature coming soon!')}
-                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
-                        >
-                          <FaVideo className="text-sm" />
-                          Video Call
-                        </button>
-                        <button
-                          onClick={() => alert('Chat feature coming soon!')}
-                          className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
-                        >
-                          <FaComment className="text-sm" />
-                          Chat
-                        </button>
-                      </div>
+                      )}
                     </div>
                   </div>
 

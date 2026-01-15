@@ -342,14 +342,14 @@ export default function PostedTasks() {
                           placeholder="Min ₹"
                           value={minAmount}
                           onChange={(e) => setMinAmount(e.target.value)}
-                          className="w-24 py-2 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <input
                           type="number"
                           placeholder="Max ₹"
                           value={maxAmount}
                           onChange={(e) => setMaxAmount(e.target.value)}
-                          className="w-24 py-2 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                       <input
@@ -574,7 +574,7 @@ export default function PostedTasks() {
                                   <FaEye />
                                   View Details
                                 </Link>
-                                {task.status === 'open' ? (
+                                {task.status === 'pending' ? (
                                   <button
                                     onClick={() => deleteTask(task.id)}
                                     className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50"
