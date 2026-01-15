@@ -206,7 +206,7 @@ export default function PostedTasks() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6 bg-gradient-to-b from-gray-50 to-blue-50">
+    <div className="min-h-screen p-4 md:p-6 bg-linear-to-b from-gray-50 to-blue-50">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <motion.div
@@ -225,7 +225,7 @@ export default function PostedTasks() {
             <div className="flex items-center gap-4">
               <Link
                 to="/post-task"
-                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 text-white transition-all shadow-lg rounded-xl bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 hover:shadow-xl hover:scale-105"
               >
                 <FaPlusCircle className="text-white" />
                 <span className="text-white">Post New Task</span>
@@ -314,7 +314,7 @@ export default function PostedTasks() {
                         onClick={() => setSortBy("amount")}
                         className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                           sortBy === "amount"
-                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                            ? "bg-linear-to-r from-blue-500 to-purple-500 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
@@ -409,7 +409,7 @@ export default function PostedTasks() {
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                           activeTab === tab
-                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                            ? "bg-linear-to-r from-blue-500 to-purple-500 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
@@ -518,7 +518,7 @@ export default function PostedTasks() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="p-6 transition-all duration-300 bg-white border border-gray-200 shadow-lg rounded-2xl hover:shadow-2xl hover:bg-gradient-to-br hover:from-white hover:to-gray-50 hover:scale-105"
+                          className="p-6 transition-all duration-300 bg-white border border-gray-200 shadow-lg rounded-2xl hover:shadow-2xl hover:bg-linear-to-br hover:from-white hover:to-gray-50 hover:scale-105"
                         >
                           <div className="flex flex-col gap-4">
                             {/* Top row: Title and amount */}

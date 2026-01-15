@@ -220,7 +220,7 @@ export default function Layout() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 text-gray-900">
+    <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 text-gray-900">
       
       {/* Top Navigation Bar */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg shadow-sm border-b border-gray-200">
@@ -232,13 +232,13 @@ export default function Layout() {
                 whileHover={{ scale: 1.05 }}
                 className="relative"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                   <FaMapMarkerAlt className="text-white text-base" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white"></div>
               </motion.div>
               <div>
-                <h1 className="text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent" style={{ fontSize: '2.5rem' }}>
+                <h1 className="text-sm font-bold bg-linear-to-br from-blue-600 to-purple-600 bg-clip-text text-transparent" style={{ fontSize: '2.5rem' }}>
                   DoHelp
                 </h1>
               </div>
@@ -252,14 +252,14 @@ export default function Layout() {
                   to={link.to}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
                     location.pathname === link.to
-                      ? "bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 border border-blue-100"
+                      ? "bg-linear-to-br from-blue-50 to-purple-50 text-blue-600 border border-blue-100"
                       : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                   } ${link.highlight ? "font-semibold" : ""}`}
                 >
                   {link.icon}
                   <span>{link.label}</span>
                   {link.highlight && (
-                    <span className="ml-1 px-2 py-0.5 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full">
+                    <span className="ml-1 px-2 py-0.5 text-xs bg-linear-to-br from-blue-500 to-purple-500 text-white rounded-full">
                       New
                     </span>
                   )}
@@ -393,7 +393,7 @@ export default function Layout() {
                   </Link>
                   <Link
                     to="/register"
-                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 !text-white hover:from-blue-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg"
+                    className="px-6 py-2 rounded-xl bg-linear-to-br from-blue-500 to-purple-500 text-white! hover:from-blue-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg"
                   >
                     Sign Up
                   </Link>
@@ -427,14 +427,14 @@ export default function Layout() {
                     to={link.to}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                       location.pathname === link.to
-                        ? "bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600"
+                        ? "bg-linear-to-br from-blue-50 to-purple-50 text-blue-600"
                         : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     {link.icon}
                     <span>{link.label}</span>
                     {link.highlight && (
-                      <span className="ml-auto px-2 py-1 text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full">
+                      <span className="ml-auto px-2 py-1 text-xs bg-linear-to-br from-blue-500 to-purple-500 text-white rounded-full">
                         New
                       </span>
                     )}
@@ -483,7 +483,7 @@ export default function Layout() {
                     </Link>
                     <Link
                       to="/register"
-                      className="px-4 py-3 text-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 !text-white hover:from-blue-600 hover:to-purple-600 transition-all"
+                      className="px-4 py-3 text-center rounded-xl bg-linear-to-br from-blue-500 to-purple-500 text-white! hover:from-blue-600 hover:to-purple-600 transition-all"
                     >
                       Sign Up
                     </Link>
@@ -496,18 +496,18 @@ export default function Layout() {
       </nav>
 
       {/* Page Content */}
-      <main className="flex-grow">
+      <main className="grow">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+      <footer className="bg-linear-to-br from-gray-900 to-gray-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Company Info */}
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                   <FaMapMarkerAlt className="text-white text-xl" />
                 </div>
                 <div>
@@ -599,7 +599,7 @@ export default function Layout() {
                   placeholder="Your email"
                   className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
                 />
-                <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all">
+                <button className="px-4 py-2 rounded-lg bg-linear-to-br from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all">
                   Subscribe
                 </button>
               </div>
@@ -636,7 +636,7 @@ export default function Layout() {
       {user && (
         <Link
           to="/post-task"
-          className="fixed bottom-6 right-6 md:hidden z-40 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+          className="fixed bottom-6 right-6 md:hidden z-40 w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
         >
           <FaPlusCircle className="text-2xl" />
         </Link>

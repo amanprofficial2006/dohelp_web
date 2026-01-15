@@ -213,7 +213,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white overflow-hidden">
       
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -232,7 +232,7 @@ export default function Landing() {
             alt="People helping each other"
             className="w-full h-full object-cover opacity-20"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-purple-900/80"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-blue-900/90 to-purple-900/80"></div>
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -307,7 +307,7 @@ export default function Landing() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl p-8 backdrop-blur-lg border border-white/20 shadow-2xl">
+              <div className="relative bg-linear-to-br from-blue-500/20 to-purple-500/20 rounded-3xl p-8 backdrop-blur-lg border border-white/20 shadow-2xl">
                 <div className="absolute -top-6 -right-6 w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center text-4xl">
                   🚀
                 </div>
@@ -321,7 +321,7 @@ export default function Landing() {
                     className="space-y-6"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${steps[activeStep].color} flex items-center justify-center text-white text-2xl font-bold`}>
+                      <div className={`w-16 h-16 rounded-2xl bg-linear-to-br ${steps[activeStep].color} flex items-center justify-center text-white text-2xl font-bold`}>
                         {steps[activeStep].number}
                       </div>
                       <div>
@@ -356,12 +356,12 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-6 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-blue-100 to-purple-100 px-6 py-2 rounded-full mb-4">
               <FaClock className="text-blue-600" />
               <span className="font-semibold text-blue-600">Simple 3-Step Process</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              How It <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Works</span>
+              How It <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Works</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               From posting a task to getting it done - everything in minutes
@@ -381,16 +381,16 @@ export default function Landing() {
               >
                 {/* Connecting Line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-1/2 left-3/4 w-full h-1 bg-gradient-to-r from-blue-200 to-purple-200 z-0 group-hover:from-blue-300 group-hover:to-purple-300 transition-all"></div>
+                  <div className="hidden md:block absolute top-1/2 left-3/4 w-full h-1 bg-linear-to-r from-blue-200 to-purple-200 z-0 group-hover:from-blue-300 group-hover:to-purple-300 transition-all"></div>
                 )}
                 
-                <div className="relative bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 z-10">
-                  <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center text-white text-3xl font-bold shadow-lg`}>
+                <div className="relative bg-linear-to-br from-white to-gray-50 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 z-10">
+                  <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-2xl bg-linear-to-br ${step.color} flex items-center justify-center text-white text-3xl font-bold shadow-lg`}>
                     {step.number}
                   </div>
                   
                   <div className="mt-10 mb-6 flex justify-center">
-                    <div className={`p-6 rounded-2xl bg-gradient-to-br ${step.color} text-white text-4xl`}>
+                    <div className={`p-6 rounded-2xl bg-linear-to-br ${step.color} text-white text-4xl`}>
                       {step.icon}
                     </div>
                   </div>
@@ -420,7 +420,7 @@ export default function Landing() {
             viewport={{ once: true }}
             className="mt-16 text-center"
           >
-            <div className="inline-flex items-center gap-4 bg-gradient-to-r from-green-50 to-emerald-50 px-8 py-4 rounded-2xl border border-green-200">
+            <div className="inline-flex items-center gap-4 bg-linear-to-r from-green-50 to-emerald-50 px-8 py-4 rounded-2xl border border-green-200">
               <FaMoneyBillWave className="text-3xl text-green-600" />
               <div>
                 <div className="text-2xl font-bold text-gray-900">Earn up to <span className="text-green-600">₹5000/week</span></div>
@@ -432,7 +432,7 @@ export default function Landing() {
       </section>
 
       {/* TASK CATEGORIES - UPDATED WITH IMAGES */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-20 bg-linear-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -440,12 +440,12 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-6 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-blue-100 to-purple-100 px-6 py-2 rounded-full mb-4">
               <FaThumbsUp className="text-blue-600" />
               <span className="font-semibold text-blue-600">Most Popular Categories</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Find Help For <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Anything</span>
+              Find Help For <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Anything</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Browse through thousands of tasks in popular categories
@@ -477,11 +477,11 @@ export default function Landing() {
                       />
                     </div>
 
-                    {/* Overlay Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Overlay linear */}
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                     {/* Category Icon */}
-                    <div className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-white text-xl shadow-lg`}>
+                    <div className={`absolute top-4 right-4 z-10 w-12 h-12 rounded-xl bg-linear-to-br ${category.color} flex items-center justify-center text-white text-xl shadow-lg`}>
                       {category.icon}
                     </div>
 
@@ -521,7 +521,7 @@ export default function Landing() {
           >
             <Link
               to="/categories"
-              className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-500 !text-white hover:from-blue-600 hover:to-purple-600 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-3 bg-linear-to-r from-blue-500 to-purple-500 text-white! hover:from-blue-600 hover:to-purple-600 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <span>View All Categories</span>
               <FaArrowRight className="group-hover:translate-x-2 transition-transform" />
@@ -539,12 +539,12 @@ export default function Landing() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-linear-to-r from-green-100 to-emerald-100 px-6 py-2 rounded-full mb-4">
               <FaHeart className="text-green-600" />
               <span className="font-semibold text-green-600">Trust & Safety</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Why Trust <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">DoHelp</span>?
+              Why Trust <span className="bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">DoHelp</span>?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Your safety and satisfaction are our top priorities
@@ -562,8 +562,8 @@ export default function Landing() {
                 whileHover={{ scale: 1.05 }}
                 className="group"
               >
-                <div className="bg-gradient-to-b from-white to-gray-50 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center text-3xl text-blue-600 mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-linear-to-b from-white to-gray-50 p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100">
+                  <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-blue-100 to-purple-100 flex items-center justify-center text-3xl text-blue-600 mb-6 group-hover:scale-110 transition-transform duration-300">
                     {feature.icon}
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
@@ -587,7 +587,7 @@ export default function Landing() {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
+            <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
               <div className="text-center mb-8">
                 <h3 className="text-3xl font-bold text-gray-900 mb-4">What Our Users Say</h3>
                 <p className="text-gray-600">Join thousands of satisfied users</p>
@@ -650,7 +650,7 @@ export default function Landing() {
             alt="Community"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-purple-900/80"></div>
+          <div className="absolute inset-0 bg-linear-to-r from-blue-900/90 to-purple-900/80"></div>
         </div>
         
         <motion.div
@@ -670,7 +670,7 @@ export default function Landing() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 to="/register"
-                className="bg-gradient-to-r from-blue-500 to-purple-500 !text-white hover:from-blue-600 hover:to-purple-600 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 shadow-2xl hover:shadow-3xl flex items-center gap-3"
+                className="bg-linear-to-r from-blue-500 to-purple-500 text-white! hover:from-blue-600 hover:to-purple-600 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 shadow-2xl hover:shadow-3xl flex items-center gap-3"
               >
                 <span>Sign Up Free</span>
                 <FaArrowRight className="group-hover:translate-x-2 transition-transform" />
@@ -679,7 +679,7 @@ export default function Landing() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 to="/how-it-works"
-                className="bg-transparent border-2 border-white !text-white hover:bg-white/10 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300"
+                className="bg-transparent border-2 border-white text-white! hover:bg-white/10 font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300"
               >
                 Learn More
               </Link>
