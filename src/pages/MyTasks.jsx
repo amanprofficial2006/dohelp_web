@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../contexts/CategoriesContext";
+import Chat from "../components/Chat";
 import {
   FaSearch,
   FaFilter,
@@ -32,6 +33,7 @@ import {
   FaFire
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function MyTasks() {
   const { user } = useAuth();
@@ -49,7 +51,9 @@ export default function MyTasks() {
   const [minAmount, setMinAmount] = useState("0");
   const [maxAmount, setMaxAmount] = useState("10000");
   const [selectedCategories, setSelectedCategories] = useState([]);
-
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [selectedTaskData, setSelectedTaskData] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const formatTimeAgo = (dateString) => {
     const now = new Date();
     const created = new Date(dateString);
@@ -97,11 +101,11 @@ export default function MyTasks() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Task accepted successfully!");
+        toast.success("Task accepted successfully!");
         // Refresh the tasks list
         setNearbyTasks(prev => prev.filter(task => task.id !== taskId));
       } else {
-        alert(data.message || "Failed to accept task");
+        toast.error(data.message || "Failed to accept task");
       }
     } catch (error) {
       alert("Something went wrong");
@@ -154,6 +158,7 @@ export default function MyTasks() {
             urgent: task.urgency_level === 'urgent',
             status: task.status || 'open',
             user_name: task.user?.name || 'Nearby Task Poster',
+            user_uid: task.user?.user_uid || 'N/A',
             user_rating: task.user?.rating || 0,
             created_at: task.created_at,
             progress: 0,
@@ -669,7 +674,10 @@ export default function MyTasks() {
                                 {task.status === "accepted" && (
                                   <>
                                     {(task.contact_preference === 'message'|| task.contact_preference === 'both') && (
-                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50">
+                                      <button
+                                        onClick={() => { setIsChatOpen(true); setSelectedTaskId(task.id); setSelectedTaskData(task); }}
+                                        className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50"
+                                      >
                                         <FaComment />
                                         Message
                                       </button>
@@ -754,6 +762,15 @@ export default function MyTasks() {
           </div>
         </div>
       </div>
+
+      {/* Chat Component */}
+      <Chat
+        isOpen={isChatOpen}
+        onClose={() => { setIsChatOpen(false); setSelectedTaskId(null); }}
+        taskId={selectedTaskId}
+        taskData={selectedTaskData}
+      />
     </div>
   );
+
 }
