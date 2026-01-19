@@ -43,7 +43,12 @@ export const TasksProvider = ({ children }) => {
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-          const responseData = await response.json();
+          let responseData;
+          try {
+            responseData = await response.json();
+          } catch (parseError) {
+            throw new Error('Server returned invalid JSON response');
+          }
           if (responseData.success && responseData.tasks) {
             // Map API data to expected format
             const mappedTasks = responseData.tasks.map(task => ({
@@ -115,27 +120,40 @@ export const TasksProvider = ({ children }) => {
         }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        const mappedTasks = data.tasks.map(task => ({
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          category: task.category,
-          amount: `₹${task.amount}`,
-          location: task.location,
-          created_at: task.created_at,
-          postedTime: getPostedTime(task.created_at),
-          deadline: new Date(task.deadline).toLocaleDateString(),
-          status: task.status,
-          offers: 0,
-          acceptedBy: null,
-          urgent: task.urgency_level === 'urgent'
-        }));
-        setPostedTasks(mappedTasks);
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          let data;
+          try {
+            data = await response.json();
+          } catch (parseError) {
+            throw new Error('Server returned invalid JSON response');
+          }
+          if (data.success && data.tasks) {
+            const mappedTasks = data.tasks.map(task => ({
+              id: task.id,
+              title: task.title,
+              description: task.description,
+              category: task.category,
+              amount: `₹${task.amount}`,
+              location: task.location,
+              created_at: task.created_at,
+              postedTime: getPostedTime(task.created_at),
+              deadline: new Date(task.deadline).toLocaleDateString(),
+              status: task.status,
+              offers: 0,
+              acceptedBy: null,
+              urgent: task.urgency_level === 'urgent'
+            }));
+            setPostedTasks(mappedTasks);
+          } else {
+            throw new Error('Invalid response structure');
+          }
+        } else {
+          throw new Error('Server returned non-JSON response');
+        }
       } else {
-        throw new Error('Failed to fetch posted tasks');
+        throw new Error(`Failed to fetch posted tasks: ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching posted tasks:', error);
@@ -242,8 +260,17 @@ export const TasksProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchUserTasks();
-    fetchPostedTasks();
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      fetchUserTasks();
+      fetchPostedTasks();
+    } else {
+      setLoading(false);
+      setPostedTasksLoading(false);
+      // Optionally set fallback data or empty arrays
+      setUserTasks([]);
+      setPostedTasks([]);
+    }
   }, []);
 
   const refreshTasks = () => {
