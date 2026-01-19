@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getDeviceToken } from '../firebase';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +41,14 @@ export default function Login() {
     console.log("Login data:", formData);
 
     try {
+      const deviceToken = await getDeviceToken();
+      console.log("Device token:", deviceToken);
+
+      if (!deviceToken) {
+        toast.error("Device token is required for login. Please enable notifications.");
+        return;
+      }
+
       const response = await fetch('https://dohelp.newhopeindia17.com/api/login', {
         method: 'POST',
         headers: {
@@ -48,6 +57,7 @@ export default function Login() {
         body: JSON.stringify({
           phone: formData.phone,
           password: formData.password,
+          device_token: deviceToken,
         }),
       });
 
