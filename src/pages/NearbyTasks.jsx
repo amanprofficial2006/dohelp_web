@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../contexts/CategoriesContext";
 import { useTasks } from "../contexts/TasksContext";
+import { toast } from "react-toastify";
 import {
   FaSearch,
   FaFilter,
@@ -87,11 +88,11 @@ export default function NearbyTasks() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Task accepted successfully!");
+        toast.success("Task accepted successfully!");
         // Refresh the tasks list
         setNearbyTasks(prev => prev.filter(task => task.id !== taskId));
       } else {
-        alert(data.message || "Failed to accept task");
+        toast.error(data.message || "Failed to accept task");
       }
     } catch (error) {
       alert("Something went wrong");
@@ -443,7 +444,7 @@ export default function NearbyTasks() {
                   to="/my-tasks"
                   className="flex items-center justify-center gap-2 font-medium text-blue-600 hover:text-blue-700"
                 >
-                  View All Available Tasks
+                  View All Accepted Tasks
                   <FaHandshake />
                 </Link>
               </div>

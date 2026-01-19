@@ -462,13 +462,19 @@ export default function NearbyTaskDetail() {
                             <FaEnvelope className="text-blue-500" />
                             <span className="font-medium text-gray-900">Message Only</span>
                           </div>
+                        ) : task.contact_preference === 'both' ? (
+                          <div className="flex items-center gap-2">
+                            <FaPhone className="text-green-500" />
+                            <FaEnvelope className="text-blue-500" />
+                            <span className="font-medium text-gray-900">Both Allowed</span>
+                          </div>
                         ) : (
                           <div className="flex items-center gap-2">
                             <FaPhone className="text-green-500" />
                             <span className="font-medium text-gray-900">Phone Calls Allowed</span>
                           </div>
                         )}
-                        
+
                         {task.contact_preference === 'message' ? (
                           <button
                             onClick={() => alert('Chat feature coming soon!')}
@@ -477,6 +483,30 @@ export default function NearbyTaskDetail() {
                             <FaComment className="text-sm" />
                             Chat
                           </button>
+                        ) : task.contact_preference === 'both' ? (
+                          <>
+                            <button
+                              onClick={() => alert('Chat feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 hover:shadow-lg"
+                            >
+                              <FaComment className="text-sm" />
+                              Chat
+                            </button>
+                            <button
+                              onClick={() => alert('Voice call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:shadow-lg"
+                            >
+                              <FaPhone className="text-sm" />
+                              Voice Call
+                            </button>
+                            <button
+                              onClick={() => alert('Video call feature coming soon!')}
+                              className="flex items-center gap-2 px-4 py-2 font-medium text-white transition-all duration-300 rounded-lg bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg"
+                            >
+                              <FaVideo className="text-sm" />
+                              Video Call
+                            </button>
+                          </>
                         ) : (
                           <>
                             <button
@@ -515,6 +545,12 @@ export default function NearbyTaskDetail() {
                             <>
                               <FaEnvelope className="text-blue-500" />
                               <span className="font-medium text-gray-900">Message Only</span>
+                            </>
+                          ) : task.contact_preference === 'both' ? (
+                            <>
+                              <FaPhone className="text-green-500" />
+                              <FaEnvelope className="text-blue-500" />
+                              <span className="font-medium text-gray-900">Both Allowed</span>
                             </>
                           ) : (
                             <>
@@ -597,7 +633,7 @@ export default function NearbyTaskDetail() {
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-4 sm:flex-row">
-                {task.status === 'open' && (
+                {task.status === 'pending' && (
                   <button
                     onClick={acceptTask}
                     disabled={acceptingTask}

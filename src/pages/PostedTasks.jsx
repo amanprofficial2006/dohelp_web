@@ -158,7 +158,8 @@ export default function PostedTasks() {
               offers: 0,
               acceptedBy: task.accepted_by || null,
               helperName: task.helper?.name || null,
-              urgent: task.urgency_level === 'urgent'
+              urgent: task.urgency_level === 'urgent',
+              contact_preference: task.contact_preference
             };
           });
           setTasks(mappedTasks);
@@ -574,7 +575,7 @@ export default function PostedTasks() {
                                   <FaEye />
                                   View Details
                                 </Link>
-                                {task.status === 'pending' ? (
+                                {task.status === 'open' ? (
                                   <button
                                     onClick={() => deleteTask(task.id)}
                                     className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 transition-colors border border-red-300 rounded-lg hover:bg-red-50"
@@ -582,15 +583,22 @@ export default function PostedTasks() {
                                     <FaTrash />
                                     Delete
                                   </button>
-                                ) : (
-                                  <button
-                                    onClick={() => alert('Contact Helper feature coming soon!')}
-                                    className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50"
-                                  >
-                                    <FaPhone />
-                                    Contact Helper
-                                  </button>
-                                )}
+                                ) : task.status === 'accepted' ? (
+                                  <>
+                                    {(task.contact_preference === 'message'|| task.contact_preference === 'both') && (
+                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50">
+                                        <FaComment />
+                                        Message
+                                      </button>
+                                    )}
+                                    {(task.contact_preference === 'call' || task.contact_preference === 'both') && (
+                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50">
+                                        <FaPhone />
+                                        Call
+                                      </button>
+                                    )}
+                                  </>
+                                ) : null}
                               </div>
                               <div className="flex items-center gap-2">
                                 {task.urgent && (

@@ -23,6 +23,7 @@ import {
   FaShare,
   FaPhone,
   FaComment,
+  FaVideo,
   FaThumbsUp,
   FaChartLine,
   FaTrophy,
@@ -128,7 +129,7 @@ export default function MyTasks() {
           return;
         }
 
-        const response = await fetch('https://dohelp.newhopeindia17.com/api/tasks/nearby', {
+        const response = await fetch('https://dohelp.newhopeindia17.com/api/tasks/accepted', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -161,7 +162,8 @@ export default function MyTasks() {
             deadline: task.deadline,
             rating: null,
             review: null,
-            reason: null
+            reason: null,
+            contact_preference: task.contact_preference
           }));
           setNearbyTasks(transformedTasks);
         } else {
@@ -375,7 +377,7 @@ export default function MyTasks() {
                   <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Amount Range</label>
                     <div className="space-y-3">
-                      <div className="flex gap-2 items-center">
+                      <div className="flex items-center gap-2">
                         <input
                           type="number"
                           placeholder="Min ₹"
@@ -656,35 +658,32 @@ export default function MyTasks() {
                                   <FaEye />
                                   View Details
                                 </button>
-                                {task.status === "in-progress" && (
-                                  <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50">
-                                    <FaCheckCircle />
-                                    Mark Complete
-                                  </button>
+                                 {task.status === "in-progress" && (
+                                  <>
+                                    <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50">
+                                      <FaCheckCircle />
+                                      Mark Complete
+                                    </button>
+                                  </>
                                 )}
                                 {task.status === "accepted" && (
-                                  <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50">
-                                    <FaComment />
-                                    Message
-                                  </button>
-                                )}
-                                
-                                {task.status === "pending" && (
-                                  <button
-                                    onClick={() => acceptTask(task.id)}
-                                    disabled={acceptingTasks.has(task.id)}
-                                    className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                  >
-                                    {acceptingTasks.has(task.id) ? (
-                                      <div className="flex items-center justify-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                                        <span>Accepting...</span>
-                                      </div>
-                                    ) : (
-                                      "Accept"
+                                  <>
+                                    {(task.contact_preference === 'message'|| task.contact_preference === 'both') && (
+                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50">
+                                        <FaComment />
+                                        Message
+                                      </button>
                                     )}
-                                  </button>
+                                    {(task.contact_preference === 'call' || task.contact_preference === 'both') && (
+                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-green-600 transition-colors border border-green-300 rounded-lg hover:bg-green-50">
+                                        <FaPhone />
+                                        Call
+                                      </button>
+                                    )}
+                                  </>
                                 )}
+
+
                               </div>
                               <div className="flex items-center gap-2">
                                 {task.urgent && (
