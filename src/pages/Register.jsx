@@ -72,33 +72,33 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-12">
+    <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute w-64 h-64 bg-blue-200 rounded-full top-1/4 left-1/4 mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute w-64 h-64 bg-purple-200 rounded-full bottom-1/4 right-1/4 mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute transform -translate-x-1/2 -translate-y-1/2 rounded-full top-1/2 left-1/2 w-96 h-96 bg-cyan-200 mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl flex flex-col md:flex-row rounded-3xl overflow-hidden shadow-2xl bg-white"
+        className="flex flex-col w-full max-w-6xl overflow-hidden bg-white shadow-2xl md:flex-row rounded-3xl"
       >
         {/* Left Side - Form */}
-        <div className="w-full md:w-1/2 p-8 md:p-12">
+        <div className="w-full p-8 md:w-1/2 md:p-12">
           <div className="max-w-md mx-auto">
             {/* Header */}
-            <div className="text-center mb-8">
+            <div className="mb-8 text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
-                  <FaHandshake className="text-white text-2xl" />
+                  <FaHandshake className="text-2xl text-white" />
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">Join DoHelp</h1>
-                  <p className="text-sm text-blue-600 font-medium mt-1">
+                  <p className="mt-1 text-sm font-medium text-blue-600">
                     Post Tasks • Find Tasks • Earn Money
                   </p>
                 </div>
@@ -109,12 +109,12 @@ export default function Register() {
             </div>
 
             {/* Universal Role Badge */}
-            <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100">
+            <div className="p-4 mb-8 border border-blue-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg shadow-sm">
                   <div className="flex">
                     <FaTasks className="text-blue-500" />
-                    <FaHandshake className="text-purple-500 -ml-2" />
+                    <FaHandshake className="-ml-2 text-purple-500" />
                   </div>
                 </div>
                 <div>
@@ -143,10 +143,10 @@ export default function Register() {
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-11 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="w-full px-4 py-3 transition-all border border-gray-300 outline-none pl-11 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                  <FaUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaUser className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                 </div>
               </div>
 
@@ -163,10 +163,10 @@ export default function Register() {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-11 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="w-full px-4 py-3 transition-all border border-gray-300 outline-none pl-11 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                  <FaEnvelope className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaEnvelope className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                 </div>
               </div>
 
@@ -185,10 +185,10 @@ export default function Register() {
                     placeholder="+91 9876543210"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-11 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="w-full px-4 py-3 transition-all border border-gray-300 outline-none pl-11 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <span className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2">
                     📱
                   </span>
                 </div>
@@ -209,19 +209,19 @@ export default function Register() {
                     placeholder="Create a strong password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-11 pr-11 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="w-full px-4 py-3 transition-all border border-gray-300 outline-none pl-11 pr-11 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                  <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaLock className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute text-gray-500 transform -translate-y-1/2 right-4 top-1/2 hover:text-gray-700"
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
+                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                   <FaCheck className="text-green-500" />
                   <span>Use at least 8 characters with letters and numbers</span>
                 </div>
@@ -240,14 +240,14 @@ export default function Register() {
                     placeholder="Confirm your password"
                     value={formData.password_confirmation}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-11 pr-11 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                    className="w-full px-4 py-3 transition-all border border-gray-300 outline-none pl-11 pr-11 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                  <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <FaLock className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute text-gray-500 transform -translate-y-1/2 right-4 top-1/2 hover:text-gray-700"
                   >
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -255,25 +255,25 @@ export default function Register() {
               </div>
 
               {/* Dual Capability Section */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <div className="p-4 border border-blue-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+                <h4 className="flex items-center gap-2 mb-3 font-semibold text-gray-900">
                   <FaShieldAlt className="text-blue-500" />
                   Your Account Lets You:
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white p-3 rounded-lg border border-blue-100">
+                  <div className="p-3 bg-white border border-blue-100 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="p-1 bg-blue-100 rounded">
-                        <FaTasks className="text-blue-600 text-sm" />
+                        <FaTasks className="text-sm text-blue-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-900">Post Tasks</span>
                     </div>
                     <p className="text-xs text-gray-600">Get help for anything you need</p>
                   </div>
-                  <div className="bg-white p-3 rounded-lg border border-purple-100">
+                  <div className="p-3 bg-white border border-purple-100 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="p-1 bg-purple-100 rounded">
-                        <FaHandshake className="text-purple-600 text-sm" />
+                        <FaHandshake className="text-sm text-purple-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-900">Help Others</span>
                     </div>
@@ -287,16 +287,16 @@ export default function Register() {
                 <input
                   type="checkbox"
                   id="terms"
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="mt-1 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   required
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600">
                   I agree to the{" "}
-                  <a href="/terms" className="text-blue-600 hover:underline font-medium">
+                  <a href="/terms" className="font-medium text-blue-600 hover:underline">
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="/privacy" className="text-blue-600 hover:underline font-medium">
+                  <a href="/privacy" className="font-medium text-blue-600 hover:underline">
                     Privacy Policy
                   </a>
                 </label>
@@ -304,13 +304,13 @@ export default function Register() {
 
               {/* Error/Success Messages */}
               {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-red-600 text-sm font-medium">{error}</p>
+                <div className="p-4 border border-red-200 bg-red-50 rounded-xl">
+                  <p className="text-sm font-medium text-red-600">{error}</p>
                 </div>
               )}
               {success && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                  <p className="text-green-600 text-sm font-medium">{success}</p>
+                <div className="p-4 border border-green-200 bg-green-50 rounded-xl">
+                  <p className="text-sm font-medium text-green-600">{success}</p>
                 </div>
               )}
 
@@ -320,7 +320,7 @@ export default function Register() {
                 whileTap={{ scale: loading ? 1 : 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 font-semibold text-white transition-all shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Creating Account..." : "Create Universal Account"}
               </motion.button>
@@ -331,7 +331,7 @@ export default function Register() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-2 text-gray-500 bg-white">Or continue with</span>
                 </div>
               </div>
 
@@ -339,7 +339,7 @@ export default function Register() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 p-3 transition-colors border border-gray-300 rounded-xl hover:bg-gray-50"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -347,16 +347,16 @@ export default function Register() {
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  <span className="text-gray-700 font-medium">Google</span>
+                  <span className="font-medium text-gray-700">Google</span>
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 p-3 transition-colors border border-gray-300 rounded-xl hover:bg-gray-50"
                 >
                   <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
-                  <span className="text-gray-700 font-medium">Facebook</span>
+                  <span className="font-medium text-gray-700">Facebook</span>
                 </button>
               </div>
 
@@ -365,7 +365,7 @@ export default function Register() {
                 Already have an account?{" "}
                 <Link 
                   to="/login" 
-                  className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
+                  className="font-semibold text-blue-600 transition-colors hover:text-blue-800 hover:underline"
                 >
                   Sign in to your account
                 </Link>
@@ -375,29 +375,29 @@ export default function Register() {
         </div>
 
         {/* Right Side - Benefits & Features */}
-        <div className="hidden md:block md:w-1/2 relative bg-gradient-to-br from-blue-600 to-purple-700">
+        <div className="relative hidden md:block md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700">
           {/* Content Overlay */}
-          <div className="relative z-10 h-full flex flex-col justify-center p-12 text-white">
+          <div className="relative z-10 flex flex-col justify-center h-full p-12 text-white">
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-4xl font-bold mb-8">
+              <h2 className="mb-8 text-4xl font-bold">
                 One Account, <span className="text-yellow-300">Endless Possibilities</span>
               </h2>
               
-              <div className="space-y-8 mb-8">
+              <div className="mb-8 space-y-8">
                 {/* Benefit 1 */}
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white/20 rounded-xl">
                     <div className="flex">
-                      <FaTasks className="text-white text-xl" />
-                      <FaMoneyBillWave className="text-white text-xl -ml-2" />
+                      <FaTasks className="text-xl text-white" />
+                      <FaMoneyBillWave className="-ml-2 text-xl text-white" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Post & Earn Simultaneously</h3>
+                    <h3 className="mb-2 text-xl font-semibold">Post & Earn Simultaneously</h3>
                     <p className="text-white/90">
                       Need help with something? Post a task. Want to earn? Help someone else. 
                       Do both with the same account!
@@ -408,10 +408,10 @@ export default function Register() {
                 {/* Benefit 2 */}
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white/20 rounded-xl">
-                    <FaHandshake className="text-white text-2xl" />
+                    <FaHandshake className="text-2xl text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Build Community Trust</h3>
+                    <h3 className="mb-2 text-xl font-semibold">Build Community Trust</h3>
                     <p className="text-white/90">
                       Your ratings and reviews work both ways - whether you're posting tasks 
                       or helping others.
@@ -422,10 +422,10 @@ export default function Register() {
                 {/* Benefit 3 */}
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white/20 rounded-xl">
-                    <FaShieldAlt className="text-white text-2xl" />
+                    <FaShieldAlt className="text-2xl text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Secure & Flexible</h3>
+                    <h3 className="mb-2 text-xl font-semibold">Secure & Flexible</h3>
                     <p className="text-white/90">
                       Complete control over your interactions. Switch between posting and 
                       helping anytime.
@@ -435,23 +435,23 @@ export default function Register() {
               </div>
 
               {/* How It Works */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mt-8">
-                <h4 className="text-xl font-semibold mb-4">How It Works:</h4>
+              <div className="p-6 mt-8 bg-white/10 backdrop-blur-sm rounded-2xl">
+                <h4 className="mb-4 text-xl font-semibold">How It Works:</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-white/20">
                       <span className="font-bold">1</span>
                     </div>
                     <div className="text-sm">Create Account</div>
                   </div>
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-white/20">
                       <span className="font-bold">2</span>
                     </div>
                     <div className="text-sm">Browse & Post Tasks</div>
                   </div>
                   <div className="text-center">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-white/20">
                       <span className="font-bold">3</span>
                     </div>
                     <div className="text-sm">Earn & Get Help</div>
@@ -479,32 +479,7 @@ export default function Register() {
         </div>
       </motion.div>
 
-      {/* Animation Styles */}
-      <style jsx>{`
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-      `}</style>
+
     </div>
   );
 }
