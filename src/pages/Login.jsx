@@ -58,6 +58,7 @@ export default function Login() {
           phone: formData.phone,
           password: formData.password,
           device_token: deviceToken,
+          device_type: "web",
         }),
       });
 
