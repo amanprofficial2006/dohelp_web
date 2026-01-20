@@ -64,15 +64,4 @@ export const getDeviceToken = async () => {
   }
 };
 
-/**
- * 📩 Foreground message listener
- * Jab app open ho tab notification handle karega
- */
-export const onForegroundMessage = (callback) => {
-  onMessage(messaging, (payload) => {
-    console.log("Foreground FCM message:", payload);
-    callback(payload);
-  });
-};
-
 export default app;
