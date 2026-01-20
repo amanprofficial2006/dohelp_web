@@ -1,5 +1,6 @@
-- [x] Update Chat.jsx header to display task poster's name and UID instead of logged-in user
-- [x] Add loading state for task details in header
-- [x] Pass taskData prop from MyTasks to Chat component
-- [x] Update header to use taskData.user_name and taskData.user_uid as primary source
-- [x] Add user_uid field to task transformation in MyTasks.jsx
+# Chat Component Fixes - Additional Issues
+
+- [x] Add API_BASE constant for backend URL
+- [x] Replace all fetch("/api/...") with fetch(`${API_BASE}/...`)
+- [x] Confirm receiver_uid is used in conversation request body
+- [x] Confirm setConversationId uses data.conversation_id

@@ -24,10 +24,13 @@ export const TasksProvider = ({ children }) => {
       setError(null);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout to 15 seconds
 
-      // Get user ID from localStorage or context
-      const token = sessionStorage.getItem('token'); // Default to 1 for demo
+      const token = sessionStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch('https://dohelp.newhopeindia17.com/api/post-task', {
         headers: {
@@ -36,7 +39,6 @@ export const TasksProvider = ({ children }) => {
         },
         signal: controller.signal
       });
-  
 
       clearTimeout(timeoutId);
 
@@ -47,6 +49,7 @@ export const TasksProvider = ({ children }) => {
           try {
             responseData = await response.json();
           } catch (parseError) {
+            console.warn('Server returned invalid JSON, using fallback data');
             throw new Error('Server returned invalid JSON response');
           }
           if (responseData.success && responseData.tasks) {
@@ -61,17 +64,25 @@ export const TasksProvider = ({ children }) => {
             }));
             setUserTasks(mappedTasks);
           } else {
+            console.warn('Invalid response structure, using fallback data');
             throw new Error('Invalid response structure');
           }
         } else {
+          console.warn('Server returned non-JSON response, using fallback data');
           throw new Error('Server returned non-JSON response');
         }
       } else {
+        console.warn(`API returned ${response.status}, using fallback data`);
         throw new Error(`Failed to fetch tasks: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching user tasks:', error.message || error);
-      setError(error.message || 'Failed to load tasks');
+      if (error.name === 'AbortError') {
+        console.warn('Request timed out, using fallback data');
+        setError('Request timed out. Using offline data.');
+      } else {
+        console.warn('API error, using fallback data:', error.message || error);
+        setError(error.message || 'Failed to load tasks. Using offline data.');
+      }
 
       // Fallback to demo data if API fails
       const fallbackTasks = [
@@ -111,14 +122,24 @@ export const TasksProvider = ({ children }) => {
       setPostedTasksLoading(true);
       setPostedTasksError(null);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout to 15 seconds
+
       const token = sessionStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch('https://dohelp.newhopeindia17.com/api/post-task', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -127,6 +148,7 @@ export const TasksProvider = ({ children }) => {
           try {
             data = await response.json();
           } catch (parseError) {
+            console.warn('Server returned invalid JSON, using fallback data');
             throw new Error('Server returned invalid JSON response');
           }
           if (data.success && data.tasks) {
@@ -142,22 +164,32 @@ export const TasksProvider = ({ children }) => {
               deadline: new Date(task.deadline).toLocaleDateString(),
               status: task.status,
               offers: 0,
-              acceptedBy: null,
+              acceptedBy: task.accepted_by || null,
+              helperName: task.helper?.name || null,
+              helperUid: task.helper?.user_uid || null,
               urgent: task.urgency_level === 'urgent'
             }));
             setPostedTasks(mappedTasks);
           } else {
+            console.warn('Invalid response structure, using fallback data');
             throw new Error('Invalid response structure');
           }
         } else {
+          console.warn('Server returned non-JSON response, using fallback data');
           throw new Error('Server returned non-JSON response');
         }
       } else {
+        console.warn(`API returned ${response.status}, using fallback data`);
         throw new Error(`Failed to fetch posted tasks: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching posted tasks:', error);
-      setPostedTasksError(error.message || 'Failed to load posted tasks');
+      if (error.name === 'AbortError') {
+        console.warn('Request timed out, using fallback data');
+        setPostedTasksError('Request timed out. Using offline data.');
+      } else {
+        console.warn('API error, using fallback data:', error.message || error);
+        setPostedTasksError(error.message || 'Failed to load posted tasks. Using offline data.');
+      }
 
       // Fallback to demo data if API fails
       const fallbackTasks = [
@@ -174,6 +206,8 @@ export const TasksProvider = ({ children }) => {
           status: "open",
           offers: 3,
           acceptedBy: null,
+          helperName: null,
+          helperUid: null,
           urgent: false
         },
         {
@@ -186,9 +220,11 @@ export const TasksProvider = ({ children }) => {
           created_at: new Date(Date.now() - 86400000).toISOString(),
           postedTime: "1 day ago",
           deadline: new Date(Date.now() + 172800000).toLocaleDateString(),
-          status: "assigned",
+          status: "accepted",
           offers: 5,
           acceptedBy: "John Doe",
+          helperName: "John Doe",
+          helperUid: "JD123",
           urgent: true
         },
         {
@@ -204,6 +240,8 @@ export const TasksProvider = ({ children }) => {
           status: "completed",
           offers: 2,
           acceptedBy: "Jane Smith",
+          helperName: "Jane Smith",
+          helperUid: "JS456",
           urgent: false
         },
       ];

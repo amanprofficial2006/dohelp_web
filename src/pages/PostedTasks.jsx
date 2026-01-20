@@ -28,6 +28,7 @@ import {
   FaSortAmountUp
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import Chat from "../components/Chat";
 
 export default function PostedTasks() {
   const navigate = useNavigate();
@@ -42,6 +43,9 @@ export default function PostedTasks() {
   const [minAmount, setMinAmount] = useState("0");
   const [maxAmount, setMaxAmount] = useState("10000");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [selectedTaskData, setSelectedTaskData] = useState(null);
 
   const getPostedTime = (createdAt) => {
     const now = new Date();
@@ -158,6 +162,7 @@ export default function PostedTasks() {
               offers: 0,
               acceptedBy: task.accepted_by || null,
               helperName: task.helper?.name || null,
+              helperUid: task.helper?.user_uid || null,
               urgent: task.urgency_level === 'urgent',
               contact_preference: task.contact_preference
             };
@@ -561,7 +566,7 @@ export default function PostedTasks() {
                             <div className="text-sm text-gray-600">
                               <span className="flex items-center gap-1">
                                 <FaUser />
-                                Helper: {task.helperName || "Not Assigned"}
+                                Helper: {task.helperName ? `${task.helperName} ` : "Not Assigned"}
                               </span>
                             </div>
 
@@ -586,7 +591,17 @@ export default function PostedTasks() {
                                 ) : task.status === 'accepted' ? (
                                   <>
                                     {(task.contact_preference === 'message'|| task.contact_preference === 'both') && (
-                                      <button className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50">
+                                      <button
+                                        onClick={() => {
+                                          setSelectedTaskId(task.id);
+                                          setSelectedTaskData({
+                                            ...task,
+                                            context: 'postedTasks' // Indicate this is from PostedTasks
+                                          });
+                                          setIsChatOpen(true);
+                                        }}
+                                        className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 transition-colors border border-blue-300 rounded-lg hover:bg-blue-50"
+                                      >
                                         <FaComment />
                                         Message
                                       </button>
@@ -627,6 +642,14 @@ export default function PostedTasks() {
           </div>
         </div>
       </div>
+
+      {/* Chat Panel */}
+      <Chat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        taskId={selectedTaskId}
+        taskData={selectedTaskData}
+      />
     </div>
   );
 }

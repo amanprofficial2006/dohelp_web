@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }) => {
           // Map API fields to expected user object fields
           const userData = {
             ...responseData.data,
+            id: responseData.data.id || responseData.data.user_id,
             profileImage: responseData.data.profile_image_url || responseData.data.profileImage,
             // Add other mappings if needed
           };
@@ -79,6 +80,10 @@ export const AuthProvider = ({ children }) => {
     };
     setUser(mappedUserData);
     localStorage.setItem('user', JSON.stringify(mappedUserData));
+    // Store numeric user ID separately for chat functionality
+    if (userData.id || userData.user_id) {
+      localStorage.setItem('user_id', String(userData.id || userData.user_id));
+    }
     if (token) {
       sessionStorage.setItem('token', token);
     }

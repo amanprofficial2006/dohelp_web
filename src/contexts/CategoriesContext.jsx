@@ -58,7 +58,7 @@ export const CategoriesProvider = ({ children }) => {
       setError(null);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout to 15 seconds
 
       const response = await fetch('https://dohelp.newhopeindia17.com/api/categories/index', {
         method: 'GET',
@@ -71,29 +71,48 @@ export const CategoriesProvider = ({ children }) => {
       clearTimeout(timeoutId);
 
       if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.status && responseData.data) {
-          // Map API data to expected format
-          const mappedCategories = responseData.data
-            .filter(cat => cat.is_active) // Only active categories
-            .map(cat => ({
-              id: cat.id,
-              name: cat.name,
-              image: cat.image_url || cat.image,
-              icon: getCategoryIcon(cat.name),
-              color: getCategoryColor(cat.name),
-              is_active: cat.is_active
-            }));
-          setCategories(mappedCategories);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          let responseData;
+          try {
+            responseData = await response.json();
+          } catch (parseError) {
+            console.warn('Server returned invalid JSON, using fallback data');
+            throw new Error('Server returned invalid JSON response');
+          }
+          if (responseData.status && responseData.data) {
+            // Map API data to expected format
+            const mappedCategories = responseData.data
+              .filter(cat => cat.is_active) // Only active categories
+              .map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                image: cat.image_url || cat.image,
+                icon: getCategoryIcon(cat.name),
+                color: getCategoryColor(cat.name),
+                is_active: cat.is_active
+              }));
+            setCategories(mappedCategories);
+          } else {
+            console.warn('Invalid response structure, using fallback data');
+            throw new Error('Invalid response structure');
+          }
         } else {
-          throw new Error('Invalid response structure');
+          console.warn('Server returned non-JSON response, using fallback data');
+          throw new Error('Server returned non-JSON response');
         }
       } else {
+        console.warn(`API returned ${response.status}, using fallback data`);
         throw new Error(`Failed to fetch categories: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error.message || error);
-      setError(error.message || 'Failed to load categories');
+      if (error.name === 'AbortError') {
+        console.warn('Request timed out, using fallback data');
+        setError('Request timed out. Using offline data.');
+      } else {
+        console.warn('API error, using fallback data:', error.message || error);
+        setError(error.message || 'Failed to load categories. Using offline data.');
+      }
 
       // Fallback to hardcoded categories if API fails
       const fallbackCategories = [
