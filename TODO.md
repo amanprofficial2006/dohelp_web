@@ -1,6 +1,3 @@
-# Chat Component Fixes - Additional Issues
-
-- [x] Add API_BASE constant for backend URL
-- [x] Replace all fetch("/api/...") with fetch(`${API_BASE}/...`)
-- [x] Confirm receiver_uid is used in conversation request body
-- [x] Confirm setConversationId uses data.conversation_id
+- [x] Change isOwnMessage logic in Chat.jsx to use message.sender_uid instead of message.sender?.user_uid
+- [x] Test the chat UI to ensure own messages appear on right and others on left
+- [x] Update isOwnMessage to use sender_uid for discrimination

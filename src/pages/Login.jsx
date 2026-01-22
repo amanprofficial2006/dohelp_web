@@ -44,10 +44,10 @@ export default function Login() {
       const deviceToken = await getDeviceToken();
       console.log("Device token:", deviceToken);
 
-      if (!deviceToken) {
-        toast.error("Device token is required for login. Please enable notifications.");
-        return;
-      }
+      // if (!deviceToken) {
+      //   toast.error("Device token is required for login. Please enable notifications.");
+      //   return;
+      // }
 
       const response = await fetch('https://dohelp.newhopeindia17.com/api/login', {
         method: 'POST',

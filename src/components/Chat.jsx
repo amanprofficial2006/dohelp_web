@@ -112,10 +112,17 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
 
     s.on("receiveMessage", (message) => {
       console.log("Realtime message:", message);
-      setMessages(prev => {
-        if (prev.some(m => m.id === message.id)) return prev;
-        return [...prev, message];
-      });
+      const normalized = {
+        ...message,
+        sender_uid: String(message.sender_uid),
+      };
+      // Only add if it's not from the current user (since sent messages are handled differently)
+      if (normalized.sender_uid !== String(user.user_uid)) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === normalized.id)) return prev;
+          return [...prev, normalized];
+        });
+      }
     });
 
     setSocket(s);
@@ -162,7 +169,20 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
       const contentType = res.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await res.json();
-        setMessages(Array.isArray(data) ? data : data.messages);
+        const messagesData = Array.isArray(data) ? data : data.messages;
+        const normalizedMessages = messagesData.map(m => ({
+          ...m,
+          sender_uid: String(m.sender_uid),
+        }));
+        setMessages(prev => {
+          const combined = [...prev];
+          normalizedMessages.forEach(msg => {
+            if (!combined.some(m => m.id === msg.id)) {
+              combined.push(msg);
+            }
+          });
+          return combined;
+        });
       } else {
         console.error('Server returned non-JSON response for messages');
       }
@@ -279,23 +299,14 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
       const data = await res.json();
       setNewMessage("");
 
-      // Emit message via socket if connected - server will broadcast back to all users in room
-      if (socket && socketConnected) {
-        console.log("Emitting message via socket:", {
-          conversation_id: conversationId,
-          message: data.message,
-          sender_uid: user.user_uid
-        });
-        socket.emit("send_message", {
-          conversation_id: conversationId,
-          message: data.message,
-          sender_uid: user.user_uid
-        });
-      } else {
-        // If socket not connected, add message to UI immediately
-        setMessages((prev) => [...prev, data]);
-        console.warn("Socket not connected, message added via API only");
-      }
+      // Add message to UI immediately
+      setMessages(prev => [
+        ...prev,
+        {
+          ...data,
+          sender_uid: String(user.user_uid),
+        },
+      ]);
     } else {
       console.error('Server returned non-JSON response for send message');
     }
@@ -322,6 +333,10 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
       sendMessage();
     }
   };
+
+  if (authLoading || !user) {
+    return null; // ya loader
+  }
 
   return (
     <AnimatePresence>
@@ -392,11 +407,12 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
                   <p>No messages yet. Start the conversation!</p>
                 </div>
               ) : (
-                messages.map((message) => {
-                  const isOwnMessage = message.sender?.user_uid === user?.user_uid;
+                messages.map((message, index) => {
+                  console.log("Message:", message, "user_uid:", user?.user_uid, "taskDetails:", taskDetails, "isOwnMessage:", (String(message.sender_uid) === String(taskDetails?.user?.user_uid) && String(user?.user_uid) === String(taskDetails?.user?.user_uid)) || (String(message.sender_uid) === String(taskDetails?.helper?.user_uid) && String(user?.user_uid) === String(taskDetails?.helper?.user_uid)));
+                  const isOwnMessage = (String(message.sender_uid) === String(taskDetails?.user?.user_uid) && String(user?.user_uid) === String(taskDetails?.user?.user?.user_uid)) || (String(message.sender_uid) === String(taskDetails?.helper?.user_uid) && String(user?.user_uid) === String(taskDetails?.helper?.user_uid));
                   return (
                     <div
-                      key={message.id}
+                      key={`${message.id}-${message.sender_uid}-${index}`}
                       className={`flex ${
                         isOwnMessage ? "justify-end" : "justify-start"
                       }`}
