@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { FaTimes, FaPaperPlane, FaUser } from "react-icons/fa";
+import { FaTimes, FaPaperPlane, FaUser, FaCheck, FaCheckDouble } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../contexts/AuthContext";
 import { io } from "socket.io-client";
+import EmojiPicker from "emoji-picker-react";
 
 const API_BASE = "https://dohelp.newhopeindia17.com/api";
 
@@ -15,6 +16,7 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
   const [conversationId, setConversationId] = useState(null);
   const [socket, setSocket] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -52,10 +54,11 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ receiver_uid: receiverId }),
+        body: JSON.stringify({ receiver_uid: receiverId, task_id: taskId }),
       }
     );
 
@@ -73,6 +76,17 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
       console.error('Server returned non-JSON response for conversation');
     }
   };
+
+  useEffect(() => {
+    if (taskId) {
+      // Reset state when taskId changes
+      setMessages([]);
+      setConversationId(null);
+      setTaskDetails(null);
+      setNewMessage("");
+      setShowEmojiPicker(false);
+    }
+  }, [taskId]);
 
   useEffect(() => {
     if (isOpen && taskId) {
@@ -123,6 +137,15 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
           return [...prev, normalized];
         });
       }
+    });
+
+    s.on("messageSeen", (data) => {
+      console.log("Message seen:", data);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === data.message_id ? { ...m, seen: true } : m
+        )
+      );
     });
 
     setSocket(s);
@@ -334,6 +357,11 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
     }
   };
 
+  const handleEmojiClick = (emojiObject) => {
+    setNewMessage(prev => prev + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
+
   if (authLoading || !user) {
     return null; // ya loader
   }
@@ -408,8 +436,7 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
                 </div>
               ) : (
                 messages.map((message, index) => {
-                  console.log("Message:", message, "user_uid:", user?.user_uid, "taskDetails:", taskDetails, "isOwnMessage:", (String(message.sender_uid) === String(taskDetails?.user?.user_uid) && String(user?.user_uid) === String(taskDetails?.user?.user_uid)) || (String(message.sender_uid) === String(taskDetails?.helper?.user_uid) && String(user?.user_uid) === String(taskDetails?.helper?.user_uid)));
-                  const isOwnMessage = (String(message.sender_uid) === String(taskDetails?.user?.user_uid) && String(user?.user_uid) === String(taskDetails?.user?.user?.user_uid)) || (String(message.sender_uid) === String(taskDetails?.helper?.user_uid) && String(user?.user_uid) === String(taskDetails?.helper?.user_uid));
+                  const isOwnMessage = String(message.sender_uid) === String(user?.user_uid);
                   return (
                     <div
                       key={`${message.id}-${message.sender_uid}-${index}`}
@@ -421,13 +448,36 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
                         className={`max-w-xs px-4 py-2 rounded-lg ${
                           isOwnMessage
                             ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-gray-900"
+                            : message.seen
+                            ? "bg-gray-200 text-gray-900"
+                            : "bg-gray-200 text-gray-900 border-l-4 border-gray-400 cursor-pointer"
                         }`}
+                        onClick={() => {
+                          if (!message.seen) {
+                            markSeen(message.id);
+                            setMessages(prev =>
+                              prev.map(m =>
+                                m.id === message.id ? { ...m, seen: true } : m
+                              )
+                            );
+                          }
+                        }}
                       >
                         <p className="text-sm">{message.message}</p>
-                        <p className="mt-1 text-xs opacity-70">
-                          {new Date(message.created_at).toLocaleTimeString()}
-                        </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs opacity-70">
+                            {new Date(message.created_at).toLocaleTimeString()}
+                          </p>
+                          {isOwnMessage && (
+                            <div className="flex items-center ml-2">
+                              {message.seen ? (
+                                <FaCheckDouble className="text-xs opacity-70" />
+                              ) : (
+                                <FaCheck className="text-xs opacity-70" />
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -438,8 +488,19 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
 
             {/* Input */}
             {conversationId ? (
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
+              <div className="relative p-4 border-t border-gray-200 bg-gray-50">
+                {showEmojiPicker && (
+                  <div className="absolute bottom-full mb-2 right-4 z-10">
+                    <EmojiPicker onEmojiClick={handleEmojiClick} />
+                  </div>
+                )}
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="px-3 py-2 text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    😊
+                  </button>
                   <input
                     type="text"
                     value={newMessage}
@@ -470,3 +531,4 @@ const Chat = ({ isOpen, onClose, taskId, taskData }) => {
 };
 
 export default Chat;
+	
